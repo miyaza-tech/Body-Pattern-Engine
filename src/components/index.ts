@@ -5,5 +5,4 @@ export { KeywordTab } from "./KeywordTab";
 export { RecordTab } from "./RecordTab";
 export { GraphTab } from "./GraphTab";
 export { ChartTab } from "./ChartTab";
-export { StatsTab } from "./StatsTab";
 export { SyncPanel } from "./SyncPanel";

@@ -19,6 +19,9 @@ interface SyncPanelProps {
   // Toast
   showToast: (message: string) => void;
   showError: (message: string) => void;
+  // Data backup
+  onExportData: () => void;
+  onImportData: () => void;
 }
 
 export function SyncPanel({
@@ -37,6 +40,8 @@ export function SyncPanel({
   onSync,
   showToast,
   showError,
+  onExportData,
+  onImportData,
 }: SyncPanelProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -181,6 +186,22 @@ export function SyncPanel({
           </div>
         </form>
       )}
+
+      {/* 로컬 데이터 백업 */}
+      <div className="backup-section">
+        <h4>로컬 백업</h4>
+        <div className="data-actions">
+          <button onClick={onExportData} className="btn-secondary">
+            📁 내보내기
+          </button>
+          <button onClick={onImportData} className="btn-secondary">
+            📂 가져오기
+          </button>
+        </div>
+        <p className="stats-help">
+          JSON 파일로 데이터를 백업하거나 복원합니다.
+        </p>
+      </div>
     </div>
   );
 }

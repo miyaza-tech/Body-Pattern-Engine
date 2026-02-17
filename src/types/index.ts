@@ -24,7 +24,7 @@ export interface PeriodOption {
 }
 
 // ===== 탭/모드 타입 =====
-export type Tab = "keywords" | "record" | "graph" | "chart" | "stats";
+export type Tab = "keywords" | "record" | "graph" | "chart";
 export type GraphMode = "cycle" | "heatmap";
 
 // ===== 차트 타입 =====

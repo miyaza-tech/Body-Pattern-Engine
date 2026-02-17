@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import "./styles/App.css";
 import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./types";
 import { useKeywords, usePeriods, useRecords, useToast, useTheme, useCyclePrediction, useAuth, useSync } from "./hooks";
-import { KeywordTab, RecordTab, GraphTab, ChartTab, StatsTab, ToastContainer, SyncPanel } from "./components";
+import { KeywordTab, RecordTab, GraphTab, ChartTab, ToastContainer, SyncPanel } from "./components";
 import { exportAllData, importData } from "./utils";
 
 function App() {
@@ -197,13 +197,6 @@ function App() {
         >
           그래프
         </button>
-        <button
-          className={tab === "stats" ? "active" : ""}
-          onClick={() => setTab("stats")}
-          aria-selected={tab === "stats"}
-        >
-          통계
-        </button>
         <div className="header-actions">
           <button
             className="theme-toggle"
@@ -297,15 +290,6 @@ function App() {
           />
         )}
 
-        {tab === "stats" && (
-          <StatsTab
-            prediction={prediction}
-            sortedRecords={sortedRecords}
-            scaleKeywords={scaleKeywords}
-            onExportData={handleExportData}
-            onImportData={handleImportData}
-          />
-        )}
       </main>
 
       {/* 동기화 팝업 */}
@@ -329,6 +313,8 @@ function App() {
               onSync={sync.sync}
               showToast={success}
               showError={error}
+              onExportData={handleExportData}
+              onImportData={handleImportData}
             />
           </div>
         </div>
