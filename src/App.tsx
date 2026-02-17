@@ -177,7 +177,7 @@ function App() {
       success("동기화 완료");
       window.location.reload();
     } else {
-      error("동기화에 실패했습니다.");
+      error(sync.error || "동기화에 실패했습니다.");
     }
   }, [sync, success, error]);
 
