@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import "./styles/App.css";
 import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./types";
 import { useKeywords, usePeriods, useRecords, useToast, useTheme, useCyclePrediction, useAuth, useSync } from "./hooks";
@@ -17,6 +17,22 @@ function App() {
 
   // 동기화
   const sync = useSync(auth.user?.id ?? null);
+
+  // 자동 동기화 (로그인 시)
+  const hasAutoSynced = useRef(false);
+  useEffect(() => {
+    if (auth.isLoggedIn && !auth.loading && !hasAutoSynced.current) {
+      hasAutoSynced.current = true;
+      sync.sync().then((ok) => {
+        if (ok) {
+          window.location.reload();
+        }
+      });
+    }
+    if (!auth.isLoggedIn) {
+      hasAutoSynced.current = false;
+    }
+  }, [auth.isLoggedIn, auth.loading]);
 
   // 데이터 훅
   const { periods, getPeriod, addPeriod, deletePeriod, resetToDefaults: resetPeriods } = usePeriods();
