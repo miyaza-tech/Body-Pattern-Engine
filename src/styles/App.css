@@ -1131,21 +1131,22 @@ button:disabled {
 /* 데이터 액션 */
 .data-actions {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .data-actions button {
   flex: 1;
-  min-width: 140px;
-  padding: 12px 20px;
+  min-width: 80px;
+  padding: 10px 12px;
+  font-size: 13px;
 }
 
 /* ===== 동기화 패널 ===== */
 .sync-logged-in {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
   padding: 16px;
   background: var(--color-background);
   border-radius: var(--radius-md);
