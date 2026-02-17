@@ -32,14 +32,15 @@ export function SyncPanel({
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signOutLoading, setSignOutLoading] = useState(false);
 
   if (!configured) {
     return (
       <div className="record-section">
-        <h3>클라우드 동기화</h3>
+        <h3>Cloud Sync</h3>
         <p className="stats-help">
-          Supabase 설정이 필요합니다. `.env` 파일에 `VITE_SUPABASE_URL`과
-          `VITE_SUPABASE_ANON_KEY`를 설정하세요.
+          Supabase setup is required. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+          in your `.env` file.
         </p>
       </div>
     );
@@ -48,8 +49,8 @@ export function SyncPanel({
   if (authLoading) {
     return (
       <div className="record-section">
-        <h3>클라우드 동기화</h3>
-        <p className="stats-help">로딩 중...</p>
+        <h3>Cloud Sync</h3>
+        <p className="stats-help">Loading...</p>
       </div>
     );
   }
@@ -69,27 +70,31 @@ export function SyncPanel({
         return;
       }
 
-      showToast(isSignUp ? "회원가입 완료. 이메일을 확인하세요." : "로그인 성공");
+      showToast(isSignUp ? "Sign-up complete. Check your email." : "Signed in.");
       setEmail("");
       setPassword("");
     } catch (err) {
-      showError(err instanceof Error ? err.message : "인증 처리 중 오류가 발생했습니다.");
+      showError(err instanceof Error ? err.message : "Authentication failed.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleSignOut = async () => {
+    if (signOutLoading) return;
+    setSignOutLoading(true);
     try {
       await onSignOut();
     } catch (err) {
-      showError(err instanceof Error ? err.message : "로그아웃에 실패했습니다.");
+      showError(err instanceof Error ? err.message : "Sign-out failed.");
+    } finally {
+      setSignOutLoading(false);
     }
   };
 
   return (
     <div className="record-section">
-      <h3>클라우드 동기화</h3>
+      <h3>Cloud Sync</h3>
 
       {isLoggedIn ? (
         <div className="sync-logged-in">
@@ -97,25 +102,25 @@ export function SyncPanel({
             <span className="sync-status-icon">✓</span>
             <div className="sync-status-text">
               <span className="sync-email">{userEmail}</span>
-              <span className="sync-auto-msg">자동 동기화 활성화됨</span>
+              <span className="sync-auto-msg">Auto sync enabled</span>
             </div>
           </div>
-          <button onClick={handleSignOut} className="btn-text">
-            로그아웃
+          <button type="button" onClick={handleSignOut} className="btn-text" disabled={signOutLoading}>
+            {signOutLoading ? "Working..." : "Sign out"}
           </button>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="sync-login-form">
           <input
             type="email"
-            placeholder="이메일"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
             type="password"
-            placeholder="비밀번호 (6자 이상)"
+            placeholder="Password (6+ chars)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={6}
@@ -123,30 +128,30 @@ export function SyncPanel({
           />
           <div className="data-actions">
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "처리 중..." : isSignUp ? "회원가입" : "로그인"}
+              {loading ? "Working..." : isSignUp ? "Sign up" : "Sign in"}
             </button>
             <button
               type="button"
               onClick={() => setIsSignUp((prev) => !prev)}
               className="btn-text"
             >
-              {isSignUp ? "로그인으로" : "회원가입으로"}
+              {isSignUp ? "Switch to sign in" : "Switch to sign up"}
             </button>
           </div>
         </form>
       )}
 
       <div className="backup-section">
-        <h4>로컬 백업</h4>
+        <h4>Local Backup</h4>
         <div className="data-actions">
-          <button onClick={onExportData} className="btn-secondary">
-            내보내기
+          <button type="button" onClick={onExportData} className="btn-secondary">
+            Export
           </button>
-          <button onClick={onImportData} className="btn-secondary">
-            가져오기
+          <button type="button" onClick={onImportData} className="btn-secondary">
+            Import
           </button>
         </div>
-        <p className="stats-help">JSON 파일로 데이터를 백업하거나 복원합니다.</p>
+        <p className="stats-help">Back up or restore data with a JSON file.</p>
       </div>
     </div>
   );

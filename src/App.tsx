@@ -44,7 +44,6 @@ function App() {
       }
 
       sessionStorage.removeItem(SYNC_KEY);
-      error("자동 동기화에 실패했습니다. 설정 > 동기화에서 다시 시도하세요.");
     };
 
     void runAutoSync();
@@ -148,9 +147,15 @@ function App() {
 
   // 濡쒓렇?꾩썐 ?몃뱾??(?숆린???뚮옒洹?珥덇린??
   const handleSignOut = useCallback(async () => {
-    sessionStorage.removeItem("bpe_synced_session");
-    await auth.signOut();
-  }, [auth]);
+    try {
+      sessionStorage.removeItem("bpe_synced_session");
+      await auth.signOut();
+      setSyncPopupOpen(false);
+      success("로그아웃되었습니다.");
+    } catch (err) {
+      error(err instanceof Error ? err.message : "로그아웃에 실패했습니다.");
+    }
+  }, [auth, success, error]);
 
   // 湲곌컙 ?몃뱾??
   const handleDeletePeriod = useCallback(
@@ -163,7 +168,7 @@ function App() {
   // ?곗씠??諛깆뾽/蹂듭썝
   const handleExportData = useCallback(() => {
     exportAllData();
-    success("?곗씠?곌? ?대낫?닿린?섏뿀?듬땲??");
+    success("데이터를 내보냈습니다.");
   }, [success]);
 
   const handleImportData = useCallback(() => {
@@ -195,35 +200,35 @@ function App() {
           onClick={() => setTab("keywords")}
           aria-selected={tab === "keywords"}
         >
-          ?ㅼ썙??
+          키워드
         </button>
         <button
           className={tab === "record" ? "active" : ""}
           onClick={() => setTab("record")}
           aria-selected={tab === "record"}
         >
-          湲곕줉
+          기록
         </button>
         <button
           className={tab === "graph" ? "active" : ""}
           onClick={() => setTab("graph")}
           aria-selected={tab === "graph"}
         >
-          ?붾퀎
+          통계
         </button>
         <button
           className={tab === "chart" ? "active" : ""}
           onClick={() => setTab("chart")}
           aria-selected={tab === "chart"}
         >
-          洹몃옒??
+          그래프
         </button>
         <div className="header-actions">
           <button
             className="theme-toggle"
             onClick={toggleTheme}
-            aria-label={theme === "light" ? "?ㅽ겕 紐⑤뱶濡??꾪솚" : "?쇱씠??紐⑤뱶濡??꾪솚"}
-            title={theme === "light" ? "?ㅽ겕 紐⑤뱶" : "?쇱씠??紐⑤뱶"}
+            aria-label={theme === "light" ? "다크 모드로 전환" : "라이트 모드로 전환"}
+            title={theme === "light" ? "다크 모드" : "라이트 모드"}
           >
             {theme === "light" ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -239,8 +244,8 @@ function App() {
           <button
             className="sync-toggle"
             onClick={() => setSyncPopupOpen(true)}
-            aria-label="?ㅼ젙"
-            title="?ㅼ젙"
+            aria-label="설정"
+            title="설정"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="3"/>
@@ -318,7 +323,7 @@ function App() {
       {syncPopupOpen && (
         <div className="popup-overlay" onClick={() => setSyncPopupOpen(false)}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <button className="popup-close" onClick={() => setSyncPopupOpen(false)}>횞</button>
+            <button className="popup-close" onClick={() => setSyncPopupOpen(false)}>×</button>
             <SyncPanel
               isLoggedIn={auth.isLoggedIn}
               userEmail={auth.user?.email ?? null}

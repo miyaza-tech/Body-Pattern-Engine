@@ -99,10 +99,26 @@ export function useAuth() {
   const signOut = useCallback(async () => {
     if (!state.configured || !supabase) return;
 
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) {
+        if (!isIgnorableSignOutError(error.message || "")) {
+          throw error;
+        }
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (!isIgnorableSignOutError(message)) {
+        throw err;
+      }
     }
+
+    setState((prev) => ({
+      ...prev,
+      user: null,
+      session: null,
+      loading: false,
+    }));
   }, [state.configured]);
 
   return {
@@ -117,3 +133,14 @@ export function useAuth() {
     signOut,
   };
 }
+  const isIgnorableSignOutError = (message: string) => {
+    const m = message.toLowerCase();
+    return (
+      m.includes("aborted") ||
+      m.includes("aborterror") ||
+      m.includes("signal is aborted") ||
+      m.includes("failed to fetch") ||
+      m.includes("networkerror") ||
+      m.includes("load failed")
+    );
+  };
