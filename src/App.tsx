@@ -49,9 +49,8 @@ function App() {
 
       if (ok) {
         sessionStorage.setItem(SYNC_KEY, "true");
-        success("동기화 완료");
+        success("동기화 완료 - 새로고침하세요");
         autoSyncInFlightRef.current = false;
-        window.location.reload();
         return;
       }
 
@@ -174,8 +173,8 @@ function App() {
   const handleManualSync = useCallback(async () => {
     const ok = await sync.sync();
     if (ok) {
-      success("동기화 완료");
-      window.location.reload();
+      success("동기화 완료 - 새로고침하세요");
+      setSyncPopupOpen(false);
     } else {
       error(sync.error || "동기화에 실패했습니다.");
     }
