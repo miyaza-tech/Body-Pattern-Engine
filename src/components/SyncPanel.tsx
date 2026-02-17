@@ -45,10 +45,9 @@ export function SyncPanel({
   if (!configured) {
     return (
       <div className="record-section">
-        <h3>Cloud Sync</h3>
+        <h3>클라우드 동기화</h3>
         <p className="stats-help">
-          Supabase setup is required. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
-          in your `.env` file.
+          Supabase 설정이 필요합니다.
         </p>
       </div>
     );
@@ -57,8 +56,8 @@ export function SyncPanel({
   if (authLoading) {
     return (
       <div className="record-section">
-        <h3>Cloud Sync</h3>
-        <p className="stats-help">Loading...</p>
+        <h3>클라우드 동기화</h3>
+        <p className="stats-help">로딩 중...</p>
       </div>
     );
   }
@@ -78,11 +77,11 @@ export function SyncPanel({
         return;
       }
 
-      showToast(isSignUp ? "Sign-up complete. Check your email." : "Signed in.");
+      showToast(isSignUp ? "회원가입 완료. 이메일을 확인하세요." : "로그인 성공");
       setEmail("");
       setPassword("");
     } catch (err) {
-      showError(err instanceof Error ? err.message : "Authentication failed.");
+      showError(err instanceof Error ? err.message : "인증 실패");
     } finally {
       setLoading(false);
     }
@@ -94,7 +93,7 @@ export function SyncPanel({
     try {
       await onSignOut();
     } catch (err) {
-      showError(err instanceof Error ? err.message : "Sign-out failed.");
+      showError(err instanceof Error ? err.message : "로그아웃 실패");
     } finally {
       setSignOutLoading(false);
     }
@@ -102,30 +101,34 @@ export function SyncPanel({
 
   return (
     <div className="record-section">
-      <h3>Cloud Sync</h3>
+      <h3>클라우드 동기화</h3>
 
       {isLoggedIn ? (
         <div className="sync-logged-in">
           <div className="sync-status-row">
             <span className="sync-status-icon">✓</span>
-            <div className="sync-status-text">
-              <span className="sync-email">{userEmail}</span>
-            </div>
+            <span className="sync-email">{userEmail}</span>
           </div>
           <div className="data-actions">
             <button type="button" onClick={onSync} className="btn-primary" disabled={syncing}>
-              {syncing ? "Syncing..." : "Sync"}
+              {syncing ? "..." : "동기화"}
             </button>
             <button type="button" onClick={onUpload} className="btn-secondary" disabled={syncing}>
-              Upload ↑
+              ↑ 업로드
             </button>
             <button type="button" onClick={onDownload} className="btn-secondary" disabled={syncing}>
-              Download ↓
+              ↓ 다운로드
             </button>
           </div>
           <div className="data-actions">
+            <button type="button" onClick={onExportData} className="btn-secondary">
+              내보내기
+            </button>
+            <button type="button" onClick={onImportData} className="btn-secondary">
+              가져오기
+            </button>
             <button type="button" onClick={handleSignOut} className="btn-text" disabled={signOutLoading}>
-              {signOutLoading ? "Working..." : "Sign out"}
+              {signOutLoading ? "..." : "로그아웃"}
             </button>
           </div>
         </div>
@@ -133,14 +136,14 @@ export function SyncPanel({
         <form onSubmit={handleSubmit} className="sync-login-form">
           <input
             type="email"
-            placeholder="Email"
+            placeholder="이메일"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input
             type="password"
-            placeholder="Password (6+ chars)"
+            placeholder="비밀번호 (6자 이상)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={6}
@@ -148,31 +151,32 @@ export function SyncPanel({
           />
           <div className="data-actions">
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Working..." : isSignUp ? "Sign up" : "Sign in"}
+              {loading ? "..." : isSignUp ? "회원가입" : "로그인"}
             </button>
             <button
               type="button"
               onClick={() => setIsSignUp((prev) => !prev)}
               className="btn-text"
             >
-              {isSignUp ? "Switch to sign in" : "Switch to sign up"}
+              {isSignUp ? "로그인으로" : "회원가입으로"}
             </button>
           </div>
         </form>
       )}
 
-      <div className="backup-section">
-        <h4>Local Backup</h4>
-        <div className="data-actions">
-          <button type="button" onClick={onExportData} className="btn-secondary">
-            Export
-          </button>
-          <button type="button" onClick={onImportData} className="btn-secondary">
-            Import
-          </button>
+      {!isLoggedIn && (
+        <div className="backup-section">
+          <h4>로컬 백업</h4>
+          <div className="data-actions">
+            <button type="button" onClick={onExportData} className="btn-secondary">
+              내보내기
+            </button>
+            <button type="button" onClick={onImportData} className="btn-secondary">
+              가져오기
+            </button>
+          </div>
         </div>
-        <p className="stats-help">Back up or restore data with a JSON file.</p>
-      </div>
+      )}
     </div>
   );
 }
