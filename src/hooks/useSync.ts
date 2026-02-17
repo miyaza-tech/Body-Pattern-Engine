@@ -63,11 +63,14 @@ export function useSync(userId: string | null) {
 
       const { error } = await supabase
         .from("user_data")
-        .upsert({
-          user_id: userId,
-          data: localData,
-          updated_at: localData.updated_at,
-        });
+        .upsert(
+          {
+            user_id: userId,
+            data: localData,
+            updated_at: localData.updated_at,
+          },
+          { onConflict: "user_id" }
+        );
 
       if (error) throw error;
 
