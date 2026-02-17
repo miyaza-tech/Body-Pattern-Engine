@@ -170,6 +170,17 @@ function App() {
     }
   }, [auth, success, error]);
 
+  // 수동 동기화
+  const handleManualSync = useCallback(async () => {
+    const ok = await sync.sync();
+    if (ok) {
+      success("동기화 완료");
+      window.location.reload();
+    } else {
+      error("동기화에 실패했습니다.");
+    }
+  }, [sync, success, error]);
+
   // 湲곌컙 ?몃뱾??
   const handleDeletePeriod = useCallback(
     (periodId: string) => {
@@ -342,9 +353,11 @@ function App() {
               userEmail={auth.user?.email ?? null}
               configured={auth.configured}
               authLoading={auth.loading}
+              syncing={sync.syncing}
               onSignIn={auth.signIn}
               onSignUp={auth.signUp}
               onSignOut={handleSignOut}
+              onSync={handleManualSync}
               showToast={success}
               showError={error}
               onExportData={handleExportData}

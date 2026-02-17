@@ -6,9 +6,11 @@ interface SyncPanelProps {
   userEmail: string | null;
   configured: boolean;
   authLoading: boolean;
+  syncing: boolean;
   onSignIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   onSignUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   onSignOut: () => Promise<void>;
+  onSync: () => Promise<void>;
   showToast: (message: string) => void;
   showError: (message: string) => void;
   onExportData: () => void;
@@ -20,9 +22,11 @@ export function SyncPanel({
   userEmail,
   configured,
   authLoading,
+  syncing,
   onSignIn,
   onSignUp,
   onSignOut,
+  onSync,
   showToast,
   showError,
   onExportData,
@@ -102,12 +106,16 @@ export function SyncPanel({
             <span className="sync-status-icon">✓</span>
             <div className="sync-status-text">
               <span className="sync-email">{userEmail}</span>
-              <span className="sync-auto-msg">Auto sync enabled</span>
             </div>
           </div>
-          <button type="button" onClick={handleSignOut} className="btn-text" disabled={signOutLoading}>
-            {signOutLoading ? "Working..." : "Sign out"}
-          </button>
+          <div className="data-actions">
+            <button type="button" onClick={onSync} className="btn-primary" disabled={syncing}>
+              {syncing ? "Syncing..." : "Sync now"}
+            </button>
+            <button type="button" onClick={handleSignOut} className="btn-text" disabled={signOutLoading}>
+              {signOutLoading ? "Working..." : "Sign out"}
+            </button>
+          </div>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="sync-login-form">
