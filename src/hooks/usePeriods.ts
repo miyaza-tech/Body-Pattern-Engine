@@ -76,6 +76,7 @@ export function usePeriods() {
   const deletePeriod = useCallback(
     (periodId: string, deleteRecords: (periodId: string) => void) => {
       deleteRecords(periodId);
+      setPeriods((prev) => prev.filter((p) => p.id !== periodId));
       return true;
     },
     [setPeriods]
