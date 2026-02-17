@@ -49,8 +49,9 @@ function App() {
 
       if (ok) {
         sessionStorage.setItem(SYNC_KEY, "true");
-        success("동기화 완료 - 새로고침하세요");
+        success("동기화 완료");
         autoSyncInFlightRef.current = false;
+        setTimeout(() => window.location.reload(), 100);
         return;
       }
 
@@ -171,11 +172,13 @@ function App() {
 
   // 수동 동기화
   const handleManualSync = useCallback(async () => {
+    sessionStorage.setItem("bpe_synced_session", "true");
     const ok = await sync.sync();
     if (ok) {
-      success("동기화 완료 - 새로고침하세요");
-      setSyncPopupOpen(false);
+      success("동기화 완료");
+      setTimeout(() => window.location.reload(), 100);
     } else {
+      sessionStorage.removeItem("bpe_synced_session");
       error(sync.error || "동기화에 실패했습니다.");
     }
   }, [sync, success, error]);
