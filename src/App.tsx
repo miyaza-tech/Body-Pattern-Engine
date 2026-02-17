@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback } from "react";
 import "./styles/App.css";
 import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./types";
 import { useKeywords, usePeriods, useRecords, useToast, useTheme, useCyclePrediction, useAuth, useSync } from "./hooks";
@@ -18,25 +18,8 @@ function App() {
   // 동기화
   const sync = useSync(auth.user?.id ?? null);
 
-  // 자동 동기화 (로그인 시) - sessionStorage로 세션 중 1회만 실행
-  const hasAutoSynced = useRef(false);
-  useEffect(() => {
-    const syncKey = `bpe_auto_synced_${auth.user?.id}`;
-    const alreadySynced = sessionStorage.getItem(syncKey);
-    
-    if (auth.isLoggedIn && !auth.loading && !hasAutoSynced.current && !alreadySynced) {
-      hasAutoSynced.current = true;
-      sessionStorage.setItem(syncKey, "true");
-      sync.sync().then((ok) => {
-        if (ok) {
-          window.location.reload();
-        }
-      });
-    }
-    if (!auth.isLoggedIn) {
-      hasAutoSynced.current = false;
-    }
-  }, [auth.isLoggedIn, auth.loading, auth.user?.id]);
+  // 자동 동기화 비활성화 (수동 동기화 사용)
+  // 로그인 시 자동 동기화가 무한 루프를 일으켜 비활성화함
 
   // 데이터 훅
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, resetToDefaults: resetPeriods } = usePeriods();
