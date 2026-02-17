@@ -128,24 +128,34 @@ textarea {
   background: var(--color-text);
 }
 
-/* 테마 토글 */
-.theme-toggle {
+/* 테마 토글 & 설정 버튼 */
+.header-actions {
   margin-left: auto;
-  background: transparent;
+  display: flex;
+  gap: 8px;
+}
+
+.theme-toggle,
+.sync-toggle {
+  background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   width: 36px;
   height: 36px;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  color: var(--color-text-secondary);
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.sync-toggle:hover {
   border-color: var(--color-text);
+  color: var(--color-text);
+  background: var(--color-background);
 }
 
 /* ===== 콘텐츠 ===== */
@@ -1113,4 +1123,57 @@ button:disabled {
   .date-nav select {
     flex: 1 1 40%;
   }
+}
+
+/* ===== Sync 토글 버튼 ===== */
+/* 위의 .header-actions에서 함께 정의됨 */
+
+/* ===== 팝업 오버레이 ===== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.popup-content {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: background 0.2s;
+}
+
+.popup-close:hover {
+  background: var(--color-border);
+  color: var(--color-text);
 }
