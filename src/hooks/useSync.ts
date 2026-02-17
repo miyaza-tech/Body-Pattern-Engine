@@ -40,10 +40,16 @@ export function useSync(userId: string | null) {
   }, []);
 
   const setLocalData = useCallback((data: SyncData) => {
-    localStorage.setItem(STORAGE_KEYS.keywords, JSON.stringify(data.keywords));
-    localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(data.records));
-    localStorage.setItem(STORAGE_KEYS.periods, JSON.stringify(data.periods));
+    console.log("setLocalData called:", { 
+      keywordsCount: data.keywords?.length ?? 0,
+      periodsCount: data.periods?.length ?? 0,
+      recordsCount: Object.keys(data.records ?? {}).length,
+    });
+    localStorage.setItem(STORAGE_KEYS.keywords, JSON.stringify(data.keywords ?? []));
+    localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(data.records ?? {}));
+    localStorage.setItem(STORAGE_KEYS.periods, JSON.stringify(data.periods ?? []));
     localStorage.setItem(LOCAL_SYNC_AT_KEY, data.updated_at || new Date().toISOString());
+    console.log("localStorage updated");
   }, []);
 
   const upload = useCallback(async () => {
@@ -164,25 +170,36 @@ export function useSync(userId: string | null) {
         .eq("user_id", userId)
         .single();
 
+      console.log("Sync - cloudData:", cloudData);
+      console.log("Sync - fetchError:", fetchError);
+
       const localData = getLocalData();
       const localUpdatedAt = new Date(localData.updated_at);
+      console.log("Sync - localUpdatedAt:", localUpdatedAt);
 
       if (fetchError && fetchError.code !== "PGRST116") {
         throw fetchError;
       }
 
       if (!cloudData) {
+        console.log("Sync - no cloud data, uploading");
         const uploaded = await upload();
         if (!uploaded) return false;
       } else {
         const cloudUpdatedAt = new Date(cloudData.updated_at);
+        console.log("Sync - cloudUpdatedAt:", cloudUpdatedAt);
+        console.log("Sync - cloud > local?", cloudUpdatedAt > localUpdatedAt);
+        
         if (cloudUpdatedAt > localUpdatedAt) {
+          console.log("Sync - downloading from cloud");
           const data = cloudData.data as Omit<SyncData, "updated_at">;
+          console.log("Sync - cloud data content:", data);
           setLocalData({
             ...data,
             updated_at: cloudData.updated_at,
           });
         } else {
+          console.log("Sync - local is newer, uploading");
           const uploaded = await upload();
           if (!uploaded) return false;
         }
