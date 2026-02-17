@@ -899,6 +899,37 @@ button:disabled {
   border-color: var(--color-primary);
 }
 
+/* 월구간 제목 행 */
+.period-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.period-title-row h3 {
+  margin: 0;
+}
+
+.days-label {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.days-btn {
+  font-size: 14px;
+  padding: 2px 8px;
+  border: 1px dashed var(--color-border);
+  border-radius: 4px;
+}
+
+.days-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
 /* ===== 통계 ===== */
 .stats-grid {
   display: grid;

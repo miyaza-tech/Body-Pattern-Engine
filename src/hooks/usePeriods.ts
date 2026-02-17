@@ -85,6 +85,17 @@ export function usePeriods() {
     setPeriods(DEFAULT_PERIOD_OPTIONS);
   }, [setPeriods]);
 
+  const updatePeriodDays = useCallback(
+    (periodId: string, newDays: number) => {
+      if (!Number.isFinite(newDays) || newDays < 1) return false;
+      setPeriods((prev) =>
+        prev.map((p) => (p.id === periodId ? { ...p, days: newDays } : p))
+      );
+      return true;
+    },
+    [setPeriods]
+  );
+
   const periodOrder = useCallback(
     (periodId: string): number => {
       const idx = periods.findIndex((p) => p.id === periodId);
@@ -100,6 +111,7 @@ export function usePeriods() {
     getPeriod,
     addPeriod,
     deletePeriod,
+    updatePeriodDays,
     resetToDefaults,
     periodOrder,
     setPeriods,

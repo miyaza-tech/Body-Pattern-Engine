@@ -35,7 +35,7 @@ function App() {
   }, [auth.isLoggedIn, auth.loading]);
 
   // 데이터 훅
-  const { periods, getPeriod, addPeriod, deletePeriod, resetToDefaults: resetPeriods } = usePeriods();
+  const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, resetToDefaults: resetPeriods } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
   const { keywords, grouped, scaleKeywords, addKeyword, updateKeyword, deleteKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
@@ -275,6 +275,7 @@ function App() {
             selectedPeriod={selectedPeriod}
             onDeleteRecord={(day) => deleteRecord(activeSelectedPeriodId, day)}
             onMoveRecord={(fromDay, toDay) => moveRecord(activeSelectedPeriodId, fromDay, toDay)}
+            onUpdateDays={(newDays) => updatePeriodDays(activeSelectedPeriodId, newDays)}
           />
         )}
 

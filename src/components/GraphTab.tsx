@@ -11,6 +11,7 @@ interface GraphTabProps {
   selectedPeriod: { year: number; label: string; days: number };
   onDeleteRecord: (day: number) => void;
   onMoveRecord: (fromDay: number, toDay: number) => void;
+  onUpdateDays: (newDays: number) => void;
 }
 
 export function GraphTab({
@@ -23,10 +24,13 @@ export function GraphTab({
   selectedPeriod,
   onDeleteRecord,
   onMoveRecord,
+  onUpdateDays,
 }: GraphTabProps) {
   const [editMode, setEditMode] = useState(false);
   const [editingDay, setEditingDay] = useState<number | null>(null);
   const [newDay, setNewDay] = useState<string>("");
+  const [editingDays, setEditingDays] = useState(false);
+  const [tempDays, setTempDays] = useState<string>(String(selectedPeriod.days));
 
   // 키워드 ID -> 이름 맵
   const keywordNameMap = useMemo(() => {
@@ -82,6 +86,24 @@ export function GraphTab({
     setNewDay("");
   };
 
+  const handleStartEditDays = () => {
+    setEditingDays(true);
+    setTempDays(String(selectedPeriod.days));
+  };
+
+  const handleConfirmDays = () => {
+    const newDays = parseInt(tempDays, 10);
+    if (newDays >= 1 && newDays <= 50) {
+      onUpdateDays(newDays);
+    }
+    setEditingDays(false);
+  };
+
+  const handleCancelDays = () => {
+    setEditingDays(false);
+    setTempDays(String(selectedPeriod.days));
+  };
+
   return (
     <section className="card" aria-labelledby="graph-tab-title">
       <div className="section-header">
@@ -115,7 +137,33 @@ export function GraphTab({
       {/* 선택 월구간 기록 - 바로 표시 */}
       {periods.length > 0 && (
         <div className="record-section">
-          <h3>{selectedPeriod.year}년 {selectedPeriod.label} ({selectedPeriod.days}일)</h3>
+          <div className="period-title-row">
+            <h3>{selectedPeriod.year}년 {selectedPeriod.label}</h3>
+            {editMode ? (
+              editingDays ? (
+                <div className="days-edit-row">
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={tempDays}
+                    onChange={(e) => setTempDays(e.target.value)}
+                    className="day-input"
+                    autoFocus
+                  />
+                  <span>일</span>
+                  <button className="btn-sm btn-primary" onClick={handleConfirmDays}>✓</button>
+                  <button className="btn-sm btn-secondary" onClick={handleCancelDays}>✕</button>
+                </div>
+              ) : (
+                <button className="btn-text days-btn" onClick={handleStartEditDays}>
+                  {selectedPeriod.days}일 ✎
+                </button>
+              )
+            ) : (
+              <span className="days-label">({selectedPeriod.days}일)</span>
+            )}
+          </div>
           <div className="month-simple-list">
             {Array.from({ length: selectedPeriod.days }, (_, i) => i + 1).map((day) => {
               const record = periodRecords.find((r) => r.day === day);
