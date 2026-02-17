@@ -190,7 +190,11 @@ export function useSync(userId: string | null) {
         console.log("Sync - cloudUpdatedAt:", cloudUpdatedAt);
         console.log("Sync - cloud > local?", cloudUpdatedAt > localUpdatedAt);
         
-        if (cloudUpdatedAt > localUpdatedAt) {
+        // 로컬에 periods가 없으면 새 디바이스로 간주하여 무조건 다운로드
+        const localIsEmpty = !localData.periods || localData.periods.length === 0;
+        console.log("Sync - localIsEmpty:", localIsEmpty);
+        
+        if (localIsEmpty || cloudUpdatedAt > localUpdatedAt) {
           console.log("Sync - downloading from cloud");
           const data = cloudData.data as Omit<SyncData, "updated_at">;
           console.log("Sync - cloud data content:", data);
