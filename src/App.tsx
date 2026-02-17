@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+﻿import { useState, useMemo, useCallback, useEffect } from "react";
 import "./styles/App.css";
 import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./types";
 import { useKeywords, usePeriods, useRecords, useToast, useTheme, useAuth, useSync } from "./hooks";
@@ -6,40 +6,58 @@ import { KeywordTab, RecordTab, GraphTab, ChartTab, ToastContainer, SyncPanel } 
 import { exportAllData, importData } from "./utils";
 
 function App() {
-  // 테마
+  // ?뚮쭏
   const { theme, toggleTheme } = useTheme();
 
-  // 토스트
+  // ?좎뒪??
   const { toasts, success, error, dismissToast } = useToast();
 
-  // 인증
+  // ?몄쬆
   const auth = useAuth();
 
-  // 동기화
+  // ?숆린??
   const sync = useSync(auth.user?.id ?? null);
 
-  // 로그인 시 자동 동기화 (sessionStorage로 무한루프 방지)
+  // 濡쒓렇?????먮룞 ?숆린??(sessionStorage濡?臾댄븳猷⑦봽 諛⑹?)
   useEffect(() => {
     const SYNC_KEY = "bpe_synced_session";
-    const alreadySynced = sessionStorage.getItem(SYNC_KEY);
-    
-    if (auth.isLoggedIn && !alreadySynced) {
-      sessionStorage.setItem(SYNC_KEY, "true");
-      sync.sync().then((ok) => {
-        if (ok) {
-          success("동기화 완료");
-          window.location.reload();
-        }
-      });
-    }
-  }, [auth.isLoggedIn, sync, success]);
 
-  // 데이터 훅
+    if (!auth.isLoggedIn) {
+      sessionStorage.removeItem(SYNC_KEY);
+      return;
+    }
+
+    if (sessionStorage.getItem(SYNC_KEY) === "true") {
+      return;
+    }
+
+    let cancelled = false;
+    const runAutoSync = async () => {
+      const ok = await sync.sync();
+      if (cancelled) return;
+
+      if (ok) {
+        sessionStorage.setItem(SYNC_KEY, "true");
+        success("동기화 완료");
+        window.location.reload();
+        return;
+      }
+
+      sessionStorage.removeItem(SYNC_KEY);
+      error("자동 동기화에 실패했습니다. 설정 > 동기화에서 다시 시도하세요.");
+    };
+
+    void runAutoSync();
+    return () => {
+      cancelled = true;
+    };
+  }, [auth.isLoggedIn, sync, success, error]);
+  // ?곗씠????
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
   const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
-  // UI 상태
+  // UI ?곹깭
   const [tab, setTab] = useState<Tab>("record");
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>(periods[0]?.id ?? "");
   const [selectedDay, setSelectedDay] = useState<number>(1);
@@ -47,7 +65,7 @@ function App() {
   const [graphKeywordId, setGraphKeywordId] = useState<string>("");
   const [syncPopupOpen, setSyncPopupOpen] = useState(false);
 
-  // 계산된 값
+  // 怨꾩궛??媛?
   const activeSelectedPeriodId = useMemo(() => {
     if (!periods.length) return "";
     return periods.some((p) => p.id === selectedPeriodId) ? selectedPeriodId : periods[0].id;
@@ -70,7 +88,7 @@ function App() {
     [getRecordsForPeriod, activeSelectedPeriodId]
   );
 
-  // 날짜 이동
+  // ?좎쭨 ?대룞
   const onChangePeriod = useCallback(
     (nextPeriodId: string) => {
       const nextPeriod = getPeriod(nextPeriodId);
@@ -106,7 +124,7 @@ function App() {
     setSelectedDay(1);
   }, [activeSelectedDay, activeSelectedPeriodId, periods, selectedPeriod.days]);
 
-  // 키워드 핸들러
+  // ?ㅼ썙???몃뱾??
   const handleDeleteKeyword = useCallback(
     (id: string) => {
       deleteKeyword(id, setRecords);
@@ -128,13 +146,13 @@ function App() {
     [setMemo, activeSelectedPeriodId, activeSelectedDay]
   );
 
-  // 로그아웃 핸들러 (동기화 플래그 초기화)
+  // 濡쒓렇?꾩썐 ?몃뱾??(?숆린???뚮옒洹?珥덇린??
   const handleSignOut = useCallback(async () => {
     sessionStorage.removeItem("bpe_synced_session");
     await auth.signOut();
   }, [auth]);
 
-  // 기간 핸들러
+  // 湲곌컙 ?몃뱾??
   const handleDeletePeriod = useCallback(
     (periodId: string) => {
       return deletePeriod(periodId, deleteRecordsForPeriod);
@@ -142,10 +160,10 @@ function App() {
     [deletePeriod, deleteRecordsForPeriod]
   );
 
-  // 데이터 백업/복원
+  // ?곗씠??諛깆뾽/蹂듭썝
   const handleExportData = useCallback(() => {
     exportAllData();
-    success("데이터가 내보내기되었습니다.");
+    success("?곗씠?곌? ?대낫?닿린?섏뿀?듬땲??");
   }, [success]);
 
   const handleImportData = useCallback(() => {
@@ -153,7 +171,7 @@ function App() {
       (data: { keywords: KeywordDef[]; records: Record<string, DayRecord>; periods: PeriodOption[] }) => {
         setKeywords(data.keywords);
         setRecords(data.records);
-        // periods는 usePeriods 훅에서 rehydrate 필요
+        // periods??usePeriods ?낆뿉??rehydrate ?꾩슂
         window.location.reload();
       },
       (message: string) => {
@@ -162,7 +180,7 @@ function App() {
     );
   }, [setKeywords, setRecords, error]);
 
-  // 그래프 탭에서 기록으로 이동
+  // 洹몃옒????뿉??湲곕줉?쇰줈 ?대룞
   const navigateToRecord = useCallback((day: number) => {
     setTab("record");
     setSelectedDay(day);
@@ -170,42 +188,42 @@ function App() {
 
   return (
     <div className="mobile-shell">
-      {/* 헤더 */}
+      {/* ?ㅻ뜑 */}
       <header className="top-tabs">
         <button
           className={tab === "keywords" ? "active" : ""}
           onClick={() => setTab("keywords")}
           aria-selected={tab === "keywords"}
         >
-          키워드
+          ?ㅼ썙??
         </button>
         <button
           className={tab === "record" ? "active" : ""}
           onClick={() => setTab("record")}
           aria-selected={tab === "record"}
         >
-          기록
+          湲곕줉
         </button>
         <button
           className={tab === "graph" ? "active" : ""}
           onClick={() => setTab("graph")}
           aria-selected={tab === "graph"}
         >
-          월별
+          ?붾퀎
         </button>
         <button
           className={tab === "chart" ? "active" : ""}
           onClick={() => setTab("chart")}
           aria-selected={tab === "chart"}
         >
-          그래프
+          洹몃옒??
         </button>
         <div className="header-actions">
           <button
             className="theme-toggle"
             onClick={toggleTheme}
-            aria-label={theme === "light" ? "다크 모드로 전환" : "라이트 모드로 전환"}
-            title={theme === "light" ? "다크 모드" : "라이트 모드"}
+            aria-label={theme === "light" ? "?ㅽ겕 紐⑤뱶濡??꾪솚" : "?쇱씠??紐⑤뱶濡??꾪솚"}
+            title={theme === "light" ? "?ㅽ겕 紐⑤뱶" : "?쇱씠??紐⑤뱶"}
           >
             {theme === "light" ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -221,8 +239,8 @@ function App() {
           <button
             className="sync-toggle"
             onClick={() => setSyncPopupOpen(true)}
-            aria-label="설정"
-            title="설정"
+            aria-label="?ㅼ젙"
+            title="?ㅼ젙"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="3"/>
@@ -232,7 +250,7 @@ function App() {
         </div>
       </header>
 
-      {/* 메인 콘텐츠 */}
+      {/* 硫붿씤 肄섑뀗痢?*/}
       <main className="content">
         {tab === "keywords" && (
           <KeywordTab
@@ -296,11 +314,11 @@ function App() {
 
       </main>
 
-      {/* 동기화 팝업 */}
+      {/* ?숆린???앹뾽 */}
       {syncPopupOpen && (
         <div className="popup-overlay" onClick={() => setSyncPopupOpen(false)}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <button className="popup-close" onClick={() => setSyncPopupOpen(false)}>×</button>
+            <button className="popup-close" onClick={() => setSyncPopupOpen(false)}>횞</button>
             <SyncPanel
               isLoggedIn={auth.isLoggedIn}
               userEmail={auth.user?.email ?? null}
@@ -318,10 +336,11 @@ function App() {
         </div>
       )}
 
-      {/* 토스트 알림 */}
+      {/* ?좎뒪???뚮┝ */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
 
 export default App;
+
