@@ -10,20 +10,19 @@ interface AuthState {
 }
 
 export function useAuth() {
+  const configured = isSupabaseConfigured();
   const [state, setState] = useState<AuthState>({
     user: null,
     session: null,
-    loading: true,
-    configured: isSupabaseConfigured(),
+    loading: configured,
+    configured,
   });
 
   useEffect(() => {
     if (!state.configured || !supabase) {
-      setState((prev) => ({ ...prev, loading: false }));
       return;
     }
 
-    // 현재 세션 확인
     supabase.auth.getSession().then(({ data: { session } }) => {
       setState((prev) => ({
         ...prev,
@@ -33,7 +32,6 @@ export function useAuth() {
       }));
     });
 
-    // 인증 상태 변화 감지
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -48,48 +46,63 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, [state.configured]);
 
-  // 이메일로 매직 링크 로그인
-  const signInWithEmail = useCallback(async (email: string) => {
-    if (!state.configured || !supabase) return { error: new Error("Supabase 미설정") };
+  const signInWithEmail = useCallback(
+    async (email: string) => {
+      if (!state.configured || !supabase) {
+        return { error: new Error("Supabase is not configured.") };
+      }
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
-    });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
 
-    return { error };
-  }, [state.configured]);
+      return { error };
+    },
+    [state.configured]
+  );
 
-  // 이메일 + 비밀번호 회원가입
-  const signUp = useCallback(async (email: string, password: string) => {
-    if (!state.configured || !supabase) return { error: new Error("Supabase 미설정") };
+  const signUp = useCallback(
+    async (email: string, password: string) => {
+      if (!state.configured || !supabase) {
+        return { error: new Error("Supabase is not configured.") };
+      }
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    return { error };
-  }, [state.configured]);
+      return { error };
+    },
+    [state.configured]
+  );
 
-  // 이메일 + 비밀번호 로그인
-  const signIn = useCallback(async (email: string, password: string) => {
-    if (!state.configured || !supabase) return { error: new Error("Supabase 미설정") };
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      if (!state.configured || !supabase) {
+        return { error: new Error("Supabase is not configured.") };
+      }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    return { error };
-  }, [state.configured]);
+      return { error };
+    },
+    [state.configured]
+  );
 
-  // 로그아웃
   const signOut = useCallback(async () => {
     if (!state.configured || !supabase) return;
-    await supabase.auth.signOut();
+
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
   }, [state.configured]);
 
   return {

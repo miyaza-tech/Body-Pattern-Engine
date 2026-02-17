@@ -93,7 +93,7 @@ export function ChartTab({
     );
 
     return { avg, current };
-  }, [activeGraphKeywordId, sortedRecords, selectedPeriodId, isAllKeywords]);
+  }, [activeGraphKeywordId, sortedRecords, selectedPeriodId]);
 
   // 전체 키워드 평균 시리즈 (모든 키워드를 한꺼번에 표시)
   const allKeywordsSeries: LineSeries[] = useMemo(() => {

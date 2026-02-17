@@ -3,6 +3,8 @@ import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import type { KeywordDef, DayRecord, PeriodOption } from "../types";
 import { STORAGE_KEYS } from "../constants/defaults";
 
+const LOCAL_SYNC_AT_KEY = "bpe_local_sync_updated_at";
+
 interface SyncData {
   keywords: KeywordDef[];
   records: Record<string, DayRecord>;
@@ -23,38 +25,41 @@ export function useSync(userId: string | null) {
     error: null,
   });
 
-  // 로컬 데이터 가져오기
   const getLocalData = useCallback((): SyncData => {
     const keywords = JSON.parse(localStorage.getItem(STORAGE_KEYS.keywords) || "[]");
     const records = JSON.parse(localStorage.getItem(STORAGE_KEYS.records) || "{}");
     const periods = JSON.parse(localStorage.getItem(STORAGE_KEYS.periods) || "[]");
+    const updatedAt = localStorage.getItem(LOCAL_SYNC_AT_KEY) || new Date(0).toISOString();
 
     return {
       keywords,
       records,
       periods,
-      updated_at: new Date().toISOString(),
+      updated_at: updatedAt,
     };
   }, []);
 
-  // 로컬에 데이터 저장
   const setLocalData = useCallback((data: SyncData) => {
     localStorage.setItem(STORAGE_KEYS.keywords, JSON.stringify(data.keywords));
     localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(data.records));
     localStorage.setItem(STORAGE_KEYS.periods, JSON.stringify(data.periods));
+    localStorage.setItem(LOCAL_SYNC_AT_KEY, data.updated_at || new Date().toISOString());
   }, []);
 
-  // 클라우드로 업로드
   const upload = useCallback(async () => {
     if (!userId || !isSupabaseConfigured() || !supabase) {
-      setState((prev) => ({ ...prev, error: "로그인이 필요합니다" }));
+      setState((prev) => ({ ...prev, error: "로그인이 필요합니다." }));
       return false;
     }
 
     setState((prev) => ({ ...prev, syncing: true, error: null }));
 
     try {
-      const localData = getLocalData();
+      const now = new Date().toISOString();
+      const localData: SyncData = {
+        ...getLocalData(),
+        updated_at: now,
+      };
 
       const { error } = await supabase
         .from("user_data")
@@ -65,6 +70,8 @@ export function useSync(userId: string | null) {
         });
 
       if (error) throw error;
+
+      localStorage.setItem(LOCAL_SYNC_AT_KEY, now);
 
       setState({
         syncing: false,
@@ -82,10 +89,9 @@ export function useSync(userId: string | null) {
     }
   }, [userId, getLocalData]);
 
-  // 클라우드에서 다운로드
   const download = useCallback(async () => {
     if (!userId || !isSupabaseConfigured() || !supabase) {
-      setState((prev) => ({ ...prev, error: "로그인이 필요합니다" }));
+      setState((prev) => ({ ...prev, error: "로그인이 필요합니다." }));
       return false;
     }
 
@@ -100,7 +106,6 @@ export function useSync(userId: string | null) {
 
       if (error) {
         if (error.code === "PGRST116") {
-          // 데이터 없음 - 새 사용자
           setState({
             syncing: false,
             lastSync: null,
@@ -112,7 +117,11 @@ export function useSync(userId: string | null) {
       }
 
       if (data?.data) {
-        setLocalData(data.data as SyncData);
+        const cloudData = data.data as Omit<SyncData, "updated_at">;
+        setLocalData({
+          ...cloudData,
+          updated_at: data.updated_at,
+        });
       }
 
       setState({
@@ -131,17 +140,15 @@ export function useSync(userId: string | null) {
     }
   }, [userId, setLocalData]);
 
-  // 양방향 동기화 (최신 데이터 우선)
   const sync = useCallback(async () => {
     if (!userId || !isSupabaseConfigured() || !supabase) {
-      setState((prev) => ({ ...prev, error: "로그인이 필요합니다" }));
+      setState((prev) => ({ ...prev, error: "로그인이 필요합니다." }));
       return false;
     }
 
     setState((prev) => ({ ...prev, syncing: true, error: null }));
 
     try {
-      // 클라우드 데이터 확인
       const { data: cloudData, error: fetchError } = await supabase
         .from("user_data")
         .select("data, updated_at")
@@ -156,17 +163,19 @@ export function useSync(userId: string | null) {
       }
 
       if (!cloudData) {
-        // 클라우드에 데이터 없음 - 업로드
-        await upload();
+        const uploaded = await upload();
+        if (!uploaded) return false;
       } else {
         const cloudUpdatedAt = new Date(cloudData.updated_at);
-
         if (cloudUpdatedAt > localUpdatedAt) {
-          // 클라우드가 최신 - 다운로드
-          setLocalData(cloudData.data as SyncData);
+          const data = cloudData.data as Omit<SyncData, "updated_at">;
+          setLocalData({
+            ...data,
+            updated_at: cloudData.updated_at,
+          });
         } else {
-          // 로컬이 최신 또는 같음 - 업로드
-          await upload();
+          const uploaded = await upload();
+          if (!uploaded) return false;
         }
       }
 
