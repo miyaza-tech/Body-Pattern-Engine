@@ -99,7 +99,7 @@ export function KeywordTab({
       </div>
 
       {(["scale", "check", "event", "tag"] as KeywordType[]).map((type) => (
-        <details key={type} className="record-section collapse" open={type === "scale"}>
+        <details key={type} className="record-section collapse" open>
           <summary>{TYPE_LABELS[type]}</summary>
           <ul className="keyword-list" role="list">
             {grouped[type].map((keyword) => (
