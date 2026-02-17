@@ -70,11 +70,14 @@ export function useKeywords() {
   );
 
   const updateKeyword = useCallback(
-    (id: string, name: string) => {
+    (id: string, name: string, type?: KeywordType) => {
       const trimmed = name.trim();
       if (!trimmed) return false;
 
-      setKeywords((prev) => prev.map((k) => (k.id === id ? { ...k, name: trimmed } : k)));
+      setKeywords((prev) => prev.map((k) => {
+        if (k.id !== id) return k;
+        return { ...k, name: trimmed, type: type ?? k.type };
+      }));
       return true;
     },
     [setKeywords]

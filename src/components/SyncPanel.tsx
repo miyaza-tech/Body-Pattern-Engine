@@ -9,13 +9,6 @@ interface SyncPanelProps {
   onSignIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   onSignUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   onSignOut: () => Promise<void>;
-  // Sync
-  syncing: boolean;
-  lastSync: Date | null;
-  syncError: string | null;
-  onUpload: () => Promise<boolean>;
-  onDownload: () => Promise<boolean>;
-  onSync: () => Promise<boolean>;
   // Toast
   showToast: (message: string) => void;
   showError: (message: string) => void;
@@ -32,12 +25,6 @@ export function SyncPanel({
   onSignIn,
   onSignUp,
   onSignOut,
-  syncing,
-  lastSync,
-  syncError,
-  onUpload,
-  onDownload,
-  onSync,
   showToast,
   showError,
   onExportData,
@@ -87,73 +74,24 @@ export function SyncPanel({
     setLoading(false);
   };
 
-  const handleSync = async () => {
-    const ok = await onSync();
-    if (ok) {
-      showToast("동기화 완료");
-      // 페이지 새로고침으로 데이터 반영
-      window.location.reload();
-    } else if (syncError) {
-      showError(syncError);
-    }
-  };
-
-  const handleUpload = async () => {
-    const ok = await onUpload();
-    if (ok) {
-      showToast("클라우드에 업로드 완료");
-    } else if (syncError) {
-      showError(syncError);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!window.confirm("클라우드 데이터로 덮어쓰시겠습니까? 현재 기기의 데이터는 사라집니다.")) {
-      return;
-    }
-    const ok = await onDownload();
-    if (ok) {
-      showToast("다운로드 완료");
-      window.location.reload();
-    } else if (syncError) {
-      showError(syncError);
-    }
-  };
-
-  const formatLastSync = (date: Date | null) => {
-    if (!date) return "없음";
-    return date.toLocaleString("ko-KR");
-  };
-
   return (
     <div className="record-section">
       <h3>클라우드 동기화</h3>
 
       {isLoggedIn ? (
         <>
-          <div className="sync-user-info">
-            <span>{userEmail}</span>
+          <div className="sync-logged-in">
+            <div className="sync-status-row">
+              <span className="sync-status-icon">✓</span>
+              <div className="sync-status-text">
+                <span className="sync-email">{userEmail}</span>
+                <span className="sync-auto-msg">자동 동기화 활성화됨</span>
+              </div>
+            </div>
             <button onClick={onSignOut} className="btn-text">
               로그아웃
             </button>
           </div>
-          <div className="sync-status">
-            <span>마지막 동기화: {formatLastSync(lastSync)}</span>
-          </div>
-          <div className="data-actions">
-            <button onClick={handleSync} disabled={syncing} className="btn-primary">
-              {syncing ? "동기화 중..." : "동기화"}
-            </button>
-            <button onClick={handleUpload} disabled={syncing} className="btn-secondary">
-              업로드
-            </button>
-            <button onClick={handleDownload} disabled={syncing} className="btn-secondary">
-              다운로드
-            </button>
-          </div>
-          <p className="stats-help">
-            동기화: 최신 데이터 자동 선택 | 업로드: 이 기기 → 클라우드 | 다운로드: 클라우드 → 이 기기
-          </p>
         </>
       ) : (
         <form onSubmit={handleSubmit} className="sync-login-form">

@@ -1,6 +1,4 @@
-import { useState } from "react";
 import type { KeywordDef, KeywordType, DayRecord, PeriodOption } from "../types";
-import { CURRENT_YEAR } from "../constants/defaults";
 
 interface RecordTabProps {
   periods: PeriodOption[];
@@ -14,11 +12,7 @@ interface RecordTabProps {
   onNextDay: () => void;
   onSetKeywordValue: (keyword: KeywordDef, value: number | boolean) => void;
   onSetMemo: (memo: string) => void;
-  onAddPeriod: (year: number, label: string, days: number) => boolean;
-  onDeletePeriod: (periodId: string) => boolean;
-  onResetPeriods: () => void;
   selectedPeriod: PeriodOption;
-  showToast: (message: string) => void;
 }
 
 export function RecordTab({
@@ -33,88 +27,19 @@ export function RecordTab({
   onNextDay,
   onSetKeywordValue,
   onSetMemo,
-  onAddPeriod,
-  onDeletePeriod,
-  onResetPeriods,
   selectedPeriod,
-  showToast,
 }: RecordTabProps) {
-  const [newPeriodYear, setNewPeriodYear] = useState<number>(CURRENT_YEAR);
-  const [newPeriodLabel, setNewPeriodLabel] = useState("");
-  const [newPeriodDays, setNewPeriodDays] = useState("");
-
   const dayStatus = selectedDay <= 1 ? "D0" : `D+${selectedDay - 1}`;
-
-  const handleAddPeriod = () => {
-    const days = Math.floor(Number(newPeriodDays));
-    if (onAddPeriod(newPeriodYear, newPeriodLabel, days)) {
-      setNewPeriodYear(CURRENT_YEAR);
-      setNewPeriodLabel("");
-      setNewPeriodDays("");
-      showToast("월구간이 추가되었습니다.");
-    }
-  };
-
-  const handleDeletePeriod = () => {
-    if (window.confirm("선택한 월구간과 해당 기록을 모두 삭제하시겠습니까?")) {
-      if (onDeletePeriod(selectedPeriodId)) {
-        showToast("월구간이 삭제되었습니다.");
-      }
-    }
-  };
 
   return (
     <section className="card" aria-labelledby="record-tab-title">
       <h2 id="record-tab-title">날짜별 기록</h2>
 
-      {/* 월구간 관리 */}
-      <details className="record-section first collapse">
-        <summary>월구간 관리</summary>
-        <form
-          className="period-add-row"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAddPeriod();
-          }}
-        >
-          <input
-            type="number"
-            min={1900}
-            max={2100}
-            value={newPeriodYear}
-            onChange={(e) => setNewPeriodYear(Number(e.target.value))}
-            placeholder="연도"
-            aria-label="연도"
-          />
-          <input
-            value={newPeriodLabel}
-            onChange={(e) => setNewPeriodLabel(e.target.value)}
-            placeholder="예: 1~2월, 3월"
-            aria-label="월구간 이름"
-          />
-          <input
-            type="number"
-            min={1}
-            value={newPeriodDays}
-            onChange={(e) => setNewPeriodDays(e.target.value)}
-            placeholder="일수"
-            aria-label="일수"
-          />
-          <button type="submit">구간 추가</button>
-        </form>
-        <div className="row-actions">
-          <button onClick={onResetPeriods}>기본 구간 복원</button>
-          <button onClick={handleDeletePeriod} disabled={periods.length <= 1}>
-            선택 구간 삭제
-          </button>
-        </div>
-      </details>
-
       {/* 날짜 네비게이션 */}
       {periods.length === 0 ? (
         <div className="empty-notice">
           <p>기록을 시작하려면 먼저 <strong>월구간을 추가</strong>하세요.</p>
-          <p>위의 "월구간 관리"를 열어 연도, 월구간 이름, 일수를 입력하고 "구간 추가" 버튼을 누르세요.</p>
+          <p>"월별" 탭에서 월구간을 추가할 수 있습니다.</p>
         </div>
       ) : (
         <>

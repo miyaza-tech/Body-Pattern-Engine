@@ -5,7 +5,7 @@ interface KeywordTabProps {
   keywords: KeywordDef[];
   grouped: Record<KeywordType, KeywordDef[]>;
   onAddKeyword: (name: string, type: KeywordType) => boolean;
-  onUpdateKeyword: (id: string, name: string) => boolean;
+  onUpdateKeyword: (id: string, name: string, type?: KeywordType) => boolean;
   onDeleteKeyword: (id: string) => void;
   onResetDefaults: () => void;
   showToast: (message: string) => void;
@@ -30,6 +30,7 @@ export function KeywordTab({
   const [newKeywordType, setNewKeywordType] = useState<KeywordType>("scale");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [editingType, setEditingType] = useState<KeywordType>("scale");
 
   const handleAddKeyword = () => {
     if (onAddKeyword(newKeywordName, newKeywordType)) {
@@ -40,9 +41,10 @@ export function KeywordTab({
   };
 
   const handleSaveEdit = () => {
-    if (editingId && onUpdateKeyword(editingId, editingName)) {
+    if (editingId && onUpdateKeyword(editingId, editingName, editingType)) {
       setEditingId(null);
       setEditingName("");
+      setEditingType("scale");
       showToast("키워드가 수정되었습니다.");
     }
   };
@@ -118,6 +120,16 @@ export function KeywordTab({
                       aria-label="키워드 이름 수정"
                       autoFocus
                     />
+                    <select
+                      value={editingType}
+                      onChange={(e) => setEditingType(e.target.value as KeywordType)}
+                      aria-label="키워드 유형 변경"
+                    >
+                      <option value="scale">강도형</option>
+                      <option value="check">체크형</option>
+                      <option value="event">이벤트</option>
+                      <option value="tag">태그</option>
+                    </select>
                     <button type="submit">저장</button>
                     <button type="button" onClick={() => setEditingId(null)}>
                       취소
@@ -132,6 +144,7 @@ export function KeywordTab({
                         onClick={() => {
                           setEditingId(keyword.id);
                           setEditingName(keyword.name);
+                          setEditingType(keyword.type);
                         }}
                         aria-label={`${keyword.name} 편집`}
                       >

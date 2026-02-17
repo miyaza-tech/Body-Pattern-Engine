@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import "./styles/App.css";
 import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./types";
-import { useKeywords, usePeriods, useRecords, useToast, useTheme, useCyclePrediction, useAuth, useSync } from "./hooks";
+import { useKeywords, usePeriods, useRecords, useToast, useTheme, useAuth, useSync } from "./hooks";
 import { KeywordTab, RecordTab, GraphTab, ChartTab, ToastContainer, SyncPanel } from "./components";
 import { exportAllData, importData } from "./utils";
 
@@ -18,16 +18,26 @@ function App() {
   // 동기화
   const sync = useSync(auth.user?.id ?? null);
 
-  // 자동 동기화 비활성화 (수동 동기화 사용)
-  // 로그인 시 자동 동기화가 무한 루프를 일으켜 비활성화함
+  // 로그인 시 자동 동기화 (sessionStorage로 무한루프 방지)
+  useEffect(() => {
+    const SYNC_KEY = "bpe_synced_session";
+    const alreadySynced = sessionStorage.getItem(SYNC_KEY);
+    
+    if (auth.isLoggedIn && !alreadySynced) {
+      sessionStorage.setItem(SYNC_KEY, "true");
+      sync.sync().then((ok) => {
+        if (ok) {
+          success("동기화 완료");
+          window.location.reload();
+        }
+      });
+    }
+  }, [auth.isLoggedIn, sync, success]);
 
   // 데이터 훅
-  const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, resetToDefaults: resetPeriods } = usePeriods();
+  const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
-  const { keywords, grouped, scaleKeywords, addKeyword, updateKeyword, deleteKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
-
-  // 주기 예측
-  const prediction = useCyclePrediction(sortedRecords);
+  const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
   // UI 상태
   const [tab, setTab] = useState<Tab>("record");
@@ -117,6 +127,12 @@ function App() {
     },
     [setMemo, activeSelectedPeriodId, activeSelectedDay]
   );
+
+  // 로그아웃 핸들러 (동기화 플래그 초기화)
+  const handleSignOut = useCallback(async () => {
+    sessionStorage.removeItem("bpe_synced_session");
+    await auth.signOut();
+  }, [auth]);
 
   // 기간 핸들러
   const handleDeletePeriod = useCallback(
@@ -243,11 +259,7 @@ function App() {
             onNextDay={goNextDay}
             onSetKeywordValue={handleSetKeywordValue}
             onSetMemo={handleSetMemo}
-            onAddPeriod={addPeriod}
-            onDeletePeriod={handleDeletePeriod}
-            onResetPeriods={resetPeriods}
             selectedPeriod={selectedPeriod}
-            showToast={success}
           />
         )}
 
@@ -264,6 +276,7 @@ function App() {
             onMoveRecord={(fromDay, toDay) => moveRecord(activeSelectedPeriodId, fromDay, toDay)}
             onUpdateDays={(newDays) => updatePeriodDays(activeSelectedPeriodId, newDays)}
             onDeletePeriod={() => handleDeletePeriod(activeSelectedPeriodId)}
+            onAddPeriod={addPeriod}
           />
         )}
 
@@ -295,13 +308,7 @@ function App() {
               authLoading={auth.loading}
               onSignIn={auth.signIn}
               onSignUp={auth.signUp}
-              onSignOut={auth.signOut}
-              syncing={sync.syncing}
-              lastSync={sync.lastSync}
-              syncError={sync.error}
-              onUpload={sync.upload}
-              onDownload={sync.download}
-              onSync={sync.sync}
+              onSignOut={handleSignOut}
               showToast={success}
               showError={error}
               onExportData={handleExportData}
