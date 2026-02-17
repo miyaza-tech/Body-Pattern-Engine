@@ -27,7 +27,7 @@ export const DEFAULT_KEYWORDS: KeywordDef[] = [
 export const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [];
 
 export const GRAPH_WINDOW_START = -7;
-export const GRAPH_WINDOW_END = 28;
+export const GRAPH_WINDOW_END = 35;
 
 // 차트 색상
 export const CHART_COLORS = {
