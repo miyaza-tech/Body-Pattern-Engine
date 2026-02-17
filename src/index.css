@@ -1,0 +1,32 @@
+:root {
+  font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+  line-height: 1.45;
+  font-weight: 400;
+  color: #141414;
+  background: radial-gradient(circle at top left, #fef6f6 0%, #f5f7ff 48%, #ffffff 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: #fff;
+  cursor: pointer;
+}
