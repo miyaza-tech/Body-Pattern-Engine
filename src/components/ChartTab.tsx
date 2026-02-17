@@ -5,7 +5,7 @@ import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, ChartDataPoint, Peri
 import { GRAPH_WINDOW_START, GRAPH_WINDOW_END } from "../constants/defaults";
 
 interface ChartTabProps {
-  scaleKeywords: KeywordDef[];
+  keywords: KeywordDef[];
   sortedRecords: DayRecord[];
   periods: PeriodOption[];
   selectedPeriodId: string;
@@ -16,8 +16,14 @@ interface ChartTabProps {
   onChangePeriod: (periodId: string) => void;
 }
 
+// 값을 숫자로 변환 (체크형/이벤트/태그는 true=1, false=0)
+function toNumericValue(val: number | boolean | undefined): number {
+  if (typeof val === "boolean") return val ? 1 : 0;
+  return Number(val ?? 0);
+}
+
 export function ChartTab({
-  scaleKeywords,
+  keywords,
   sortedRecords,
   periods,
   selectedPeriodId,
@@ -28,9 +34,9 @@ export function ChartTab({
   onChangePeriod,
 }: ChartTabProps) {
   const activeGraphKeywordId = useMemo(() => {
-    if (!scaleKeywords.length) return "";
-    return scaleKeywords.some((k) => k.id === graphKeywordId) ? graphKeywordId : scaleKeywords[0].id;
-  }, [scaleKeywords, graphKeywordId]);
+    if (!keywords.length) return "";
+    return keywords.some((k) => k.id === graphKeywordId) ? graphKeywordId : keywords[0].id;
+  }, [keywords, graphKeywordId]);
 
   const cycleSeries = useMemo(() => {
     if (!activeGraphKeywordId) {
@@ -47,7 +53,7 @@ export function ChartTab({
       const day = rec.day - 1;
       if (day < GRAPH_WINDOW_START || day > GRAPH_WINDOW_END) continue;
 
-      const score = Number(rec.values[activeGraphKeywordId] ?? 0);
+      const score = toNumericValue(rec.values[activeGraphKeywordId]);
       const list = buckets.get(day) ?? [];
       list.push(score);
       buckets.set(day, list);
@@ -79,14 +85,14 @@ export function ChartTab({
   }, [activeGraphKeywordId, sortedRecords, selectedPeriodId]);
 
   const heatmapData: HeatmapRow[] = useMemo(() => {
-    return scaleKeywords.map((keyword) => {
+    return keywords.map((keyword) => {
       const cells = Array.from(
         { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
         (_, idx) => {
           const day = GRAPH_WINDOW_START + idx;
           const vals = sortedRecords
             .filter((rec) => rec.day - 1 === day)
-            .map((rec) => Number(rec.values[keyword.id] ?? 0));
+            .map((rec) => toNumericValue(rec.values[keyword.id]));
           const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
           return { day, value: Number(avg.toFixed(2)) };
         }
@@ -94,7 +100,7 @@ export function ChartTab({
 
       return { keyword, cells };
     });
-  }, [scaleKeywords, sortedRecords]);
+  }, [keywords, sortedRecords]);
 
   return (
     <section className="card" aria-labelledby="chart-tab-title">
@@ -139,7 +145,7 @@ export function ChartTab({
       </div>
 
       {/* 주기기준 그래프 */}
-      {scaleKeywords.length > 0 && graphMode === "cycle" && (
+      {keywords.length > 0 && graphMode === "cycle" && (
         <>
           <div className="filter-row">
             <label htmlFor="chart-keyword-select">키워드</label>
@@ -148,7 +154,7 @@ export function ChartTab({
               value={activeGraphKeywordId}
               onChange={(e) => onSetGraphKeywordId(e.target.value)}
             >
-              {scaleKeywords.map((k) => (
+              {keywords.map((k) => (
                 <option value={k.id} key={k.id}>
                   {k.name}
                 </option>
@@ -156,7 +162,7 @@ export function ChartTab({
             </select>
           </div>
           <div className="chart-block">
-            <p>D-10 ~ D+20 (평균 / 선택구간)</p>
+            <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} (평균 / 선택구간)</p>
             <LineChart
               labels={cycleSeries.avg.map((p) => String(p.day))}
               series={[

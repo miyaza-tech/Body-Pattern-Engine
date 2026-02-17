@@ -268,7 +268,7 @@ function App() {
 
         {tab === "chart" && (
           <ChartTab
-            scaleKeywords={scaleKeywords}
+            keywords={keywords}
             sortedRecords={sortedRecords}
             periods={periods}
             selectedPeriodId={activeSelectedPeriodId}
