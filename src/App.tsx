@@ -18,11 +18,15 @@ function App() {
   // 동기화
   const sync = useSync(auth.user?.id ?? null);
 
-  // 자동 동기화 (로그인 시)
+  // 자동 동기화 (로그인 시) - sessionStorage로 세션 중 1회만 실행
   const hasAutoSynced = useRef(false);
   useEffect(() => {
-    if (auth.isLoggedIn && !auth.loading && !hasAutoSynced.current) {
+    const syncKey = `bpe_auto_synced_${auth.user?.id}`;
+    const alreadySynced = sessionStorage.getItem(syncKey);
+    
+    if (auth.isLoggedIn && !auth.loading && !hasAutoSynced.current && !alreadySynced) {
       hasAutoSynced.current = true;
+      sessionStorage.setItem(syncKey, "true");
       sync.sync().then((ok) => {
         if (ok) {
           window.location.reload();
@@ -32,7 +36,7 @@ function App() {
     if (!auth.isLoggedIn) {
       hasAutoSynced.current = false;
     }
-  }, [auth.isLoggedIn, auth.loading]);
+  }, [auth.isLoggedIn, auth.loading, auth.user?.id]);
 
   // 데이터 훅
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, resetToDefaults: resetPeriods } = usePeriods();
