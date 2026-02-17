@@ -1,8 +1,15 @@
 import { useMemo } from "react";
 import { LineChart } from "./LineChart";
 import { Heatmap } from "./Heatmap";
-import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, ChartDataPoint, PeriodOption } from "../types";
+import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, ChartDataPoint, PeriodOption, LineSeries } from "../types";
 import { GRAPH_WINDOW_START, GRAPH_WINDOW_END } from "../constants/defaults";
+
+// 키워드별 색상 팔레트
+const KEYWORD_COLORS = [
+  "#ef7a7a", "#2563eb", "#10b981", "#f59e0b", "#8b5cf6",
+  "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+  "#14b8a6", "#eab308", "#a855f7", "#22c55e", "#3b82f6",
+];
 
 interface ChartTabProps {
   keywords: KeywordDef[];
@@ -33,7 +40,11 @@ export function ChartTab({
   onSetGraphKeywordId,
   onChangePeriod,
 }: ChartTabProps) {
+  // "all"이면 전체 보기, 아니면 개별 키워드
+  const isAllKeywords = graphKeywordId === "all";
+  
   const activeGraphKeywordId = useMemo(() => {
+    if (graphKeywordId === "all") return "all";
     if (!keywords.length) return "";
     return keywords.some((k) => k.id === graphKeywordId) ? graphKeywordId : keywords[0].id;
   }, [keywords, graphKeywordId]);
@@ -82,7 +93,41 @@ export function ChartTab({
     );
 
     return { avg, current };
-  }, [activeGraphKeywordId, sortedRecords, selectedPeriodId]);
+  }, [activeGraphKeywordId, sortedRecords, selectedPeriodId, isAllKeywords]);
+
+  // 전체 키워드 평균 시리즈 (모든 키워드를 한꺼번에 표시)
+  const allKeywordsSeries: LineSeries[] = useMemo(() => {
+    if (!isAllKeywords) return [];
+    
+    return keywords.map((keyword, idx) => {
+      const buckets = new Map<number, number[]>();
+      
+      for (const rec of sortedRecords) {
+        const day = rec.day - 1;
+        if (day < GRAPH_WINDOW_START || day > GRAPH_WINDOW_END) continue;
+        
+        const score = toNumericValue(rec.values[keyword.id]);
+        const list = buckets.get(day) ?? [];
+        list.push(score);
+        buckets.set(day, list);
+      }
+      
+      const values = Array.from(
+        { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
+        (_, i) => {
+          const day = GRAPH_WINDOW_START + i;
+          const list = buckets.get(day) ?? [];
+          return list.length ? Number((list.reduce((a, b) => a + b, 0) / list.length).toFixed(2)) : 0;
+        }
+      );
+      
+      return {
+        name: keyword.name,
+        color: KEYWORD_COLORS[idx % KEYWORD_COLORS.length],
+        values,
+      };
+    });
+  }, [isAllKeywords, keywords, sortedRecords]);
 
   const heatmapData: HeatmapRow[] = useMemo(() => {
     return keywords.map((keyword) => {
@@ -154,6 +199,7 @@ export function ChartTab({
               value={activeGraphKeywordId}
               onChange={(e) => onSetGraphKeywordId(e.target.value)}
             >
+              <option value="all">📊 전체 보기</option>
               {keywords.map((k) => (
                 <option value={k.id} key={k.id}>
                   {k.name}
@@ -162,14 +208,37 @@ export function ChartTab({
             </select>
           </div>
           <div className="chart-block">
-            <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} (평균 / 선택구간)</p>
-            <LineChart
-              labels={cycleSeries.avg.map((p) => String(p.day))}
-              series={[
-                { name: "평균", color: "#ef7a7a", values: cycleSeries.avg.map((p) => p.value) },
-                { name: "선택구간", color: "#2563eb", values: cycleSeries.current.map((p) => p.value) },
-              ]}
-            />
+            {isAllKeywords ? (
+              <>
+                <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} (전체 키워드 평균)</p>
+                <LineChart
+                  labels={Array.from(
+                    { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
+                    (_, i) => String(GRAPH_WINDOW_START + i)
+                  )}
+                  series={allKeywordsSeries}
+                />
+                <div className="chart-legend">
+                  {allKeywordsSeries.map((s) => (
+                    <span key={s.name} className="legend-item">
+                      <span className="legend-color" style={{ background: s.color }}></span>
+                      {s.name}
+                    </span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} (평균 / 선택구간)</p>
+                <LineChart
+                  labels={cycleSeries.avg.map((p) => String(p.day))}
+                  series={[
+                    { name: "평균", color: "#ef7a7a", values: cycleSeries.avg.map((p) => p.value) },
+                    { name: "선택구간", color: "#2563eb", values: cycleSeries.current.map((p) => p.value) },
+                  ]}
+                />
+              </>
+            )}
           </div>
         </>
       )}
