@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { KeywordDef, DayRecordSummary, PeriodOption } from "../types";
 
 interface GraphTabProps {
@@ -9,6 +9,8 @@ interface GraphTabProps {
   onNavigateToRecord: (day: number) => void;
   onChangePeriod: (periodId: string) => void;
   selectedPeriod: { year: number; label: string; days: number };
+  onDeleteRecord: (day: number) => void;
+  onMoveRecord: (fromDay: number, toDay: number) => void;
 }
 
 export function GraphTab({
@@ -19,7 +21,13 @@ export function GraphTab({
   onNavigateToRecord,
   onChangePeriod,
   selectedPeriod,
+  onDeleteRecord,
+  onMoveRecord,
 }: GraphTabProps) {
+  const [editMode, setEditMode] = useState(false);
+  const [editingDay, setEditingDay] = useState<number | null>(null);
+  const [newDay, setNewDay] = useState<string>("");
+
   // 키워드 ID -> 이름 맵
   const keywordNameMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -43,9 +51,48 @@ export function GraphTab({
     return names;
   };
 
+  const handleDelete = (day: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`${day}일 기록을 삭제하시겠습니까?`)) {
+      onDeleteRecord(day);
+    }
+  };
+
+  const handleStartMove = (day: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingDay(day);
+    setNewDay(String(day));
+  };
+
+  const handleConfirmMove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (editingDay !== null && newDay) {
+      const targetDay = parseInt(newDay, 10);
+      if (targetDay >= 1 && targetDay <= selectedPeriod.days && targetDay !== editingDay) {
+        onMoveRecord(editingDay, targetDay);
+      }
+      setEditingDay(null);
+      setNewDay("");
+    }
+  };
+
+  const handleCancelMove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingDay(null);
+    setNewDay("");
+  };
+
   return (
     <section className="card" aria-labelledby="graph-tab-title">
-      <h2 id="graph-tab-title">월별 기록</h2>
+      <div className="section-header">
+        <h2 id="graph-tab-title">월별 기록</h2>
+        <button 
+          className={`btn-text ${editMode ? "active" : ""}`}
+          onClick={() => setEditMode(!editMode)}
+        >
+          {editMode ? "완료" : "편집"}
+        </button>
+      </div>
 
       {/* 월구간 선택 */}
       {periods.length > 0 && (
@@ -74,21 +121,59 @@ export function GraphTab({
               const record = periodRecords.find((r) => r.day === day);
               const activeNames = record ? getActiveKeywordNames(record.values) : [];
               const memoText = record?.memo ? `(${record.memo})` : "";
+              const hasRecord = activeNames.length > 0 || record?.memo;
               
               return (
                 <div 
                   key={day} 
-                  className="month-simple-row"
-                  onClick={() => onNavigateToRecord(day)}
+                  className={`month-simple-row ${editMode ? "edit-mode" : ""}`}
+                  onClick={() => !editMode && onNavigateToRecord(day)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === "Enter" && onNavigateToRecord(day)}
+                  onKeyDown={(e) => e.key === "Enter" && !editMode && onNavigateToRecord(day)}
                 >
-                  <span className="day-num">{day}일</span>
-                  <span className="day-text">
-                    {activeNames.length > 0 ? activeNames.join(" ") : "-"}
-                    {memoText && <span className="memo-inline"> {memoText}</span>}
-                  </span>
+                  {editingDay === day ? (
+                    <div className="edit-day-row" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="number"
+                        min={1}
+                        max={selectedPeriod.days}
+                        value={newDay}
+                        onChange={(e) => setNewDay(e.target.value)}
+                        className="day-input"
+                        autoFocus
+                      />
+                      <span>일로 이동</span>
+                      <button className="btn-sm btn-primary" onClick={handleConfirmMove}>✓</button>
+                      <button className="btn-sm btn-secondary" onClick={handleCancelMove}>✕</button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="day-num">{day}일</span>
+                      <span className="day-text">
+                        {activeNames.length > 0 ? activeNames.join(" ") : "-"}
+                        {memoText && <span className="memo-inline"> {memoText}</span>}
+                      </span>
+                      {editMode && hasRecord && (
+                        <div className="edit-actions">
+                          <button 
+                            className="btn-sm btn-secondary" 
+                            onClick={(e) => handleStartMove(day, e)}
+                            title="날짜 이동"
+                          >
+                            ↔
+                          </button>
+                          <button 
+                            className="btn-sm btn-danger" 
+                            onClick={(e) => handleDelete(day, e)}
+                            title="삭제"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               );
             })}

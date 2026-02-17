@@ -818,6 +818,87 @@ button:disabled {
   font-style: italic;
 }
 
+/* ===== 월별 기록 편집 모드 ===== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.section-header .btn-text.active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.month-simple-row.edit-mode {
+  cursor: default;
+}
+
+.month-simple-row.edit-mode:hover {
+  background: transparent;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.btn-sm {
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn-sm.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+.btn-sm.btn-secondary {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-sm.btn-danger {
+  background: #dc4c4c;
+  color: white;
+}
+
+.btn-sm:hover {
+  opacity: 0.85;
+}
+
+.edit-day-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.day-input {
+  width: 50px;
+  padding: 4px 6px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-card-background);
+  color: var(--color-text);
+}
+
+.day-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
 /* ===== 통계 ===== */
 .stats-grid {
   display: grid;

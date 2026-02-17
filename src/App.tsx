@@ -36,7 +36,7 @@ function App() {
 
   // 데이터 훅
   const { periods, getPeriod, addPeriod, deletePeriod, resetToDefaults: resetPeriods } = usePeriods();
-  const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, setRecords } = useRecords(periods);
+  const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
   const { keywords, grouped, scaleKeywords, addKeyword, updateKeyword, deleteKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
   // 주기 예측
@@ -273,6 +273,8 @@ function App() {
             onNavigateToRecord={navigateToRecord}
             onChangePeriod={onChangePeriod}
             selectedPeriod={selectedPeriod}
+            onDeleteRecord={(day) => deleteRecord(activeSelectedPeriodId, day)}
+            onMoveRecord={(fromDay, toDay) => moveRecord(activeSelectedPeriodId, fromDay, toDay)}
           />
         )}
 

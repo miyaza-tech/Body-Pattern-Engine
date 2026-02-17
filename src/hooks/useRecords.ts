@@ -139,6 +139,34 @@ export function useRecords(periods: PeriodOption[]) {
     [setRecords]
   );
 
+  const deleteRecord = useCallback(
+    (periodId: string, day: number) => {
+      const key = makeRecordKey(periodId, day);
+      setRecords((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    },
+    [setRecords]
+  );
+
+  const moveRecord = useCallback(
+    (periodId: string, fromDay: number, toDay: number) => {
+      const fromKey = makeRecordKey(periodId, fromDay);
+      const toKey = makeRecordKey(periodId, toDay);
+      setRecords((prev) => {
+        const record = prev[fromKey];
+        if (!record) return prev;
+        const next = { ...prev };
+        delete next[fromKey];
+        next[toKey] = { ...record, day: toDay };
+        return next;
+      });
+    },
+    [setRecords]
+  );
+
   return {
     records,
     sortedRecords,
@@ -147,6 +175,8 @@ export function useRecords(periods: PeriodOption[]) {
     setMemo,
     getRecordsForPeriod,
     deleteRecordsForPeriod,
+    deleteRecord,
+    moveRecord,
     setRecords,
   };
 }
