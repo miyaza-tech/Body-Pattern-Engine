@@ -80,10 +80,16 @@ export function useSync(userId: string | null) {
       });
       return true;
     } catch (err) {
+      const errMsg = err instanceof Error 
+        ? err.message 
+        : typeof err === "object" && err !== null && "message" in err
+          ? String((err as { message: unknown }).message)
+          : "업로드 실패";
+      console.error("Upload error:", err);
       setState({
         syncing: false,
         lastSync: null,
-        error: err instanceof Error ? err.message : "업로드 실패",
+        error: errMsg,
       });
       return false;
     }
