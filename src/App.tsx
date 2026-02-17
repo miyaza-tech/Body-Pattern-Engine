@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useCallback, useEffect } from "react";
+﻿import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import "./styles/App.css";
 import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./types";
 import { useKeywords, usePeriods, useRecords, useToast, useTheme, useAuth, useSync } from "./hooks";
@@ -17,6 +17,8 @@ function App() {
 
   // ?숆린??
   const sync = useSync(auth.user?.id ?? null);
+  const runSync = sync.sync;
+  const autoSyncInFlightRef = useRef(false);
 
   // 濡쒓렇?????먮룞 ?숆린??(sessionStorage濡?臾댄븳猷⑦봽 諛⑹?)
   useEffect(() => {
@@ -24,6 +26,7 @@ function App() {
 
     if (!auth.isLoggedIn) {
       sessionStorage.removeItem(SYNC_KEY);
+      autoSyncInFlightRef.current = false;
       return;
     }
 
@@ -31,26 +34,36 @@ function App() {
       return;
     }
 
+    if (autoSyncInFlightRef.current) {
+      return;
+    }
+
     let cancelled = false;
     const runAutoSync = async () => {
-      const ok = await sync.sync();
-      if (cancelled) return;
+      autoSyncInFlightRef.current = true;
+      const ok = await runSync();
+      if (cancelled) {
+        autoSyncInFlightRef.current = false;
+        return;
+      }
 
       if (ok) {
         sessionStorage.setItem(SYNC_KEY, "true");
         success("동기화 완료");
+        autoSyncInFlightRef.current = false;
         window.location.reload();
         return;
       }
 
       sessionStorage.removeItem(SYNC_KEY);
+      autoSyncInFlightRef.current = false;
     };
 
     void runAutoSync();
     return () => {
       cancelled = true;
     };
-  }, [auth.isLoggedIn, sync, success, error]);
+  }, [auth.isLoggedIn, runSync, success]);
   // ?곗씠????
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
@@ -348,4 +361,6 @@ function App() {
 }
 
 export default App;
+
+
 
