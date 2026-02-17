@@ -11,6 +11,8 @@ interface SyncPanelProps {
   onSignUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   onSignOut: () => Promise<void>;
   onSync: () => Promise<void>;
+  onUpload: () => Promise<void>;
+  onDownload: () => Promise<void>;
   showToast: (message: string) => void;
   showError: (message: string) => void;
   onExportData: () => void;
@@ -27,6 +29,8 @@ export function SyncPanel({
   onSignUp,
   onSignOut,
   onSync,
+  onUpload,
+  onDownload,
   showToast,
   showError,
   onExportData,
@@ -110,8 +114,16 @@ export function SyncPanel({
           </div>
           <div className="data-actions">
             <button type="button" onClick={onSync} className="btn-primary" disabled={syncing}>
-              {syncing ? "Syncing..." : "Sync now"}
+              {syncing ? "Syncing..." : "Sync"}
             </button>
+            <button type="button" onClick={onUpload} className="btn-secondary" disabled={syncing}>
+              Upload ↑
+            </button>
+            <button type="button" onClick={onDownload} className="btn-secondary" disabled={syncing}>
+              Download ↓
+            </button>
+          </div>
+          <div className="data-actions">
             <button type="button" onClick={handleSignOut} className="btn-text" disabled={signOutLoading}>
               {signOutLoading ? "Working..." : "Sign out"}
             </button>

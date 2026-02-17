@@ -182,6 +182,32 @@ function App() {
     }
   }, [sync, success, error]);
 
+  // 강제 업로드
+  const handleUpload = useCallback(async () => {
+    sessionStorage.setItem("bpe_synced_session", "true");
+    const ok = await sync.upload();
+    if (ok) {
+      success("업로드 완료!");
+      setSyncPopupOpen(false);
+    } else {
+      sessionStorage.removeItem("bpe_synced_session");
+      error(sync.error || "업로드에 실패했습니다.");
+    }
+  }, [sync, success, error]);
+
+  // 강제 다운로드
+  const handleDownload = useCallback(async () => {
+    sessionStorage.setItem("bpe_synced_session", "true");
+    const ok = await sync.download();
+    if (ok) {
+      success("다운로드 완료! 페이지를 새로고침하세요.");
+      setSyncPopupOpen(false);
+    } else {
+      sessionStorage.removeItem("bpe_synced_session");
+      error(sync.error || "다운로드에 실패했습니다.");
+    }
+  }, [sync, success, error]);
+
   // 湲곌컙 ?몃뱾??
   const handleDeletePeriod = useCallback(
     (periodId: string) => {
@@ -359,6 +385,8 @@ function App() {
               onSignUp={auth.signUp}
               onSignOut={handleSignOut}
               onSync={handleManualSync}
+              onUpload={handleUpload}
+              onDownload={handleDownload}
               showToast={success}
               showError={error}
               onExportData={handleExportData}
