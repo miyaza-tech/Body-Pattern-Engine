@@ -263,6 +263,7 @@ function App() {
             onDeleteRecord={(day) => deleteRecord(activeSelectedPeriodId, day)}
             onMoveRecord={(fromDay, toDay) => moveRecord(activeSelectedPeriodId, fromDay, toDay)}
             onUpdateDays={(newDays) => updatePeriodDays(activeSelectedPeriodId, newDays)}
+            onDeletePeriod={() => handleDeletePeriod(activeSelectedPeriodId)}
           />
         )}
 

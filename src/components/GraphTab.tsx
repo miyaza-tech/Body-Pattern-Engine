@@ -12,6 +12,7 @@ interface GraphTabProps {
   onDeleteRecord: (day: number) => void;
   onMoveRecord: (fromDay: number, toDay: number) => void;
   onUpdateDays: (newDays: number) => void;
+  onDeletePeriod: () => void;
 }
 
 export function GraphTab({
@@ -25,6 +26,7 @@ export function GraphTab({
   onDeleteRecord,
   onMoveRecord,
   onUpdateDays,
+  onDeletePeriod,
 }: GraphTabProps) {
   const [editMode, setEditMode] = useState(false);
   const [editingDay, setEditingDay] = useState<number | null>(null);
@@ -131,6 +133,19 @@ export function GraphTab({
               </option>
             ))}
           </select>
+          {editMode && periods.length > 1 && (
+            <button 
+              className="btn-sm btn-danger"
+              onClick={() => {
+                if (window.confirm(`"${selectedPeriod.year}년 ${selectedPeriod.label}" 월구간을 삭제하시겠습니까? 해당 구간의 모든 기록도 삭제됩니다.`)) {
+                  onDeletePeriod();
+                }
+              }}
+              title="월구간 삭제"
+            >
+              삭제
+            </button>
+          )}
         </div>
       )}
 
