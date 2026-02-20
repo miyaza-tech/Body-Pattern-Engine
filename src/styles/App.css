@@ -1010,6 +1010,65 @@ button:disabled {
   margin: 0;
 }
 
+.period-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 키워드 필터 */
+.keyword-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.keyword-filter-row .filter-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.keyword-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword-chip {
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.keyword-chip:hover {
+  border-color: var(--color-primary);
+}
+
+.keyword-chip.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.keyword-chip.clear {
+  background: var(--color-danger-light, #fee);
+  border-color: var(--color-danger, #c00);
+  color: var(--color-danger, #c00);
+}
+
+.keyword-chip.clear:hover {
+  background: var(--color-danger, #c00);
+  color: white;
+}
+
 .days-label {
   color: var(--color-text-secondary);
   font-size: 14px;

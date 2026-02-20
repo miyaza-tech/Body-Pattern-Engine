@@ -37,6 +37,8 @@ export function GraphTab({
   const [editingDays, setEditingDays] = useState(false);
   const [tempDays, setTempDays] = useState<string>(String(selectedPeriod.days));
   const [showAddPeriod, setShowAddPeriod] = useState(false);
+  const [showOnlyRecords, setShowOnlyRecords] = useState(false);
+  const [filterKeywordIds, setFilterKeywordIds] = useState<Set<string>>(new Set());
 
   // 월구간 추가 폼 상태
   const [newPeriodYear, setNewPeriodYear] = useState<number>(CURRENT_YEAR);
@@ -220,7 +222,14 @@ export function GraphTab({
         <div className="record-section">
           <div className="period-title-row">
             <h3>{selectedPeriod.year}년 {selectedPeriod.label}</h3>
-            {editingDays ? (
+            <div className="period-title-actions">
+              <button 
+                className={`btn-sm ${showOnlyRecords ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setShowOnlyRecords(!showOnlyRecords)}
+              >
+                {showOnlyRecords ? '기록만' : '전체'}
+              </button>
+              {editingDays ? (
               <div className="days-edit-row">
                 <input
                   type="number"
@@ -240,9 +249,65 @@ export function GraphTab({
                 {selectedPeriod.days}일 ✎
               </button>
             )}
+            </div>
           </div>
+          
+          {/* 키워드 필터 */}
+          {keywords.length > 0 && (
+            <div className="keyword-filter-row">
+              <span className="filter-label">키워드 필터:</span>
+              <div className="keyword-filter-chips">
+                {keywords.map((kw) => (
+                  <button
+                    key={kw.id}
+                    className={`keyword-chip ${filterKeywordIds.has(kw.id) ? 'active' : ''}`}
+                    onClick={() => {
+                      const newSet = new Set(filterKeywordIds);
+                      if (newSet.has(kw.id)) {
+                        newSet.delete(kw.id);
+                      } else {
+                        newSet.add(kw.id);
+                      }
+                      setFilterKeywordIds(newSet);
+                    }}
+                  >
+                    {kw.name}
+                  </button>
+                ))}
+                {filterKeywordIds.size > 0 && (
+                  <button 
+                    className="keyword-chip clear"
+                    onClick={() => setFilterKeywordIds(new Set())}
+                  >
+                    ✕ 초기화
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          
           <div className="month-simple-list">
-            {Array.from({ length: selectedPeriod.days }, (_, i) => i + 1).map((day) => {
+            {Array.from({ length: selectedPeriod.days }, (_, i) => i + 1)
+              .filter((day) => {
+                if (!showOnlyRecords && filterKeywordIds.size === 0) return true;
+                const record = periodRecords.find((r) => r.day === day);
+                if (!record) return false;
+                
+                // 키워드 필터가 있으면 해당 키워드가 활성화된 날짜만
+                if (filterKeywordIds.size > 0) {
+                  for (const kwId of filterKeywordIds) {
+                    const val = record.values[kwId];
+                    const isActive = typeof val === "number" ? val > 0 : val === true;
+                    if (isActive) return true;
+                  }
+                  return false;
+                }
+                
+                // 기록만 보기
+                const activeNames = getActiveKeywordNames(record.values);
+                return activeNames.length > 0 || record?.memo;
+              })
+              .map((day) => {
               const record = periodRecords.find((r) => r.day === day);
               const activeNames = record ? getActiveKeywordNames(record.values) : [];
               const memoText = record?.memo ? `(${record.memo})` : "";
