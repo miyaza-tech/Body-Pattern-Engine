@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { LineChart } from "./LineChart";
 import { Heatmap } from "./Heatmap";
-import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, ChartDataPoint, PeriodOption, LineSeries } from "../types";
+import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, PeriodOption, LineSeries } from "../types";
 import { GRAPH_WINDOW_START, GRAPH_WINDOW_END } from "../constants/defaults";
 
 // 키워드별 색상 팔레트
@@ -17,9 +17,7 @@ interface ChartTabProps {
   periods: PeriodOption[];
   selectedPeriodId: string;
   graphMode: GraphMode;
-  graphKeywordId: string;
   onSetGraphMode: (mode: GraphMode) => void;
-  onSetGraphKeywordId: (id: string) => void;
   onChangePeriod: (periodId: string) => void;
 }
 
@@ -35,71 +33,24 @@ export function ChartTab({
   periods,
   selectedPeriodId,
   graphMode,
-  graphKeywordId,
   onSetGraphMode,
-  onSetGraphKeywordId,
   onChangePeriod,
 }: ChartTabProps) {
-  // "all"이면 전체 보기, 아니면 개별 키워드
-  const isAllKeywords = graphKeywordId === "all";
+  // 선택된 키워드 ID들 (비어있으면 전체)
+  const [selectedKeywordIds, setSelectedKeywordIds] = useState<Set<string>>(new Set());
   
-  const activeGraphKeywordId = useMemo(() => {
-    if (graphKeywordId === "all") return "all";
-    if (!keywords.length) return "";
-    return keywords.some((k) => k.id === graphKeywordId) ? graphKeywordId : keywords[0].id;
-  }, [keywords, graphKeywordId]);
+  // 전체 보기 모드인지 (선택된 키워드가 없으면 전체)
+  const isAllKeywords = selectedKeywordIds.size === 0;
+  
+  // 표시할 키워드 목록
+  const displayKeywords = useMemo(() => {
+    if (isAllKeywords) return keywords;
+    return keywords.filter(k => selectedKeywordIds.has(k.id));
+  }, [keywords, selectedKeywordIds, isAllKeywords]);
 
-  const cycleSeries = useMemo(() => {
-    if (!activeGraphKeywordId) {
-      return {
-        avg: [] as ChartDataPoint[],
-        current: [] as ChartDataPoint[],
-      };
-    }
-
-    const buckets = new Map<number, number[]>();
-    const currentMap = new Map<number, number>();
-
-    for (const rec of sortedRecords) {
-      const day = rec.day - 1;
-      if (day < GRAPH_WINDOW_START || day > GRAPH_WINDOW_END) continue;
-
-      const score = toNumericValue(rec.values[activeGraphKeywordId]);
-      const list = buckets.get(day) ?? [];
-      list.push(score);
-      buckets.set(day, list);
-
-      if (rec.periodId === selectedPeriodId) {
-        currentMap.set(day, score);
-      }
-    }
-
-    const avg = Array.from(
-      { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
-      (_, idx) => {
-        const day = GRAPH_WINDOW_START + idx;
-        const list = buckets.get(day) ?? [];
-        const value = list.length ? list.reduce((a, b) => a + b, 0) / list.length : 0;
-        return { day, value: Number(value.toFixed(2)) };
-      }
-    );
-
-    const current = Array.from(
-      { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
-      (_, idx) => {
-        const day = GRAPH_WINDOW_START + idx;
-        return { day, value: Number(currentMap.get(day) ?? 0) };
-      }
-    );
-
-    return { avg, current };
-  }, [activeGraphKeywordId, sortedRecords, selectedPeriodId]);
-
-  // 전체 키워드 평균 시리즈 (모든 키워드를 한꺼번에 표시)
-  const allKeywordsSeries: LineSeries[] = useMemo(() => {
-    if (!isAllKeywords) return [];
-    
-    return keywords.map((keyword, idx) => {
+  // 선택된 키워드들의 평균 시리즈
+  const keywordsSeries: LineSeries[] = useMemo(() => {
+    return displayKeywords.map((keyword, idx) => {
       const buckets = new Map<number, number[]>();
       
       for (const rec of sortedRecords) {
@@ -127,7 +78,7 @@ export function ChartTab({
         values,
       };
     });
-  }, [isAllKeywords, keywords, sortedRecords]);
+  }, [displayKeywords, sortedRecords]);
 
   const heatmapData: HeatmapRow[] = useMemo(() => {
     return keywords.map((keyword) => {
@@ -192,53 +143,53 @@ export function ChartTab({
       {/* 주기기준 그래프 */}
       {keywords.length > 0 && graphMode === "cycle" && (
         <>
-          <div className="filter-row">
-            <label htmlFor="chart-keyword-select">키워드</label>
-            <select
-              id="chart-keyword-select"
-              value={activeGraphKeywordId}
-              onChange={(e) => onSetGraphKeywordId(e.target.value)}
-            >
-              <option value="all">📊 전체 보기</option>
-              {keywords.map((k) => (
-                <option value={k.id} key={k.id}>
-                  {k.name}
-                </option>
+          <div className="keyword-filter-row chart-keywords">
+            <span className="filter-label">키워드 선택:</span>
+            <div className="keyword-filter-chips">
+              {keywords.map((kw) => (
+                <button
+                  key={kw.id}
+                  className={`keyword-chip ${selectedKeywordIds.has(kw.id) ? 'active' : ''}`}
+                  onClick={() => {
+                    const newSet = new Set(selectedKeywordIds);
+                    if (newSet.has(kw.id)) {
+                      newSet.delete(kw.id);
+                    } else {
+                      newSet.add(kw.id);
+                    }
+                    setSelectedKeywordIds(newSet);
+                  }}
+                >
+                  {kw.name}
+                </button>
               ))}
-            </select>
+              {selectedKeywordIds.size > 0 && (
+                <button 
+                  className="keyword-chip clear"
+                  onClick={() => setSelectedKeywordIds(new Set())}
+                >
+                  ✕ 초기화
+                </button>
+              )}
+            </div>
           </div>
           <div className="chart-block">
-            {isAllKeywords ? (
-              <>
-                <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} (전체 키워드 평균)</p>
-                <LineChart
-                  labels={Array.from(
-                    { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
-                    (_, i) => String(GRAPH_WINDOW_START + i)
-                  )}
-                  series={allKeywordsSeries}
-                />
-                <div className="chart-legend">
-                  {allKeywordsSeries.map((s) => (
-                    <span key={s.name} className="legend-item">
-                      <span className="legend-color" style={{ background: s.color }}></span>
-                      {s.name}
-                    </span>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} (평균 / 선택구간)</p>
-                <LineChart
-                  labels={cycleSeries.avg.map((p) => String(p.day))}
-                  series={[
-                    { name: "평균", color: "#ef7a7a", values: cycleSeries.avg.map((p) => p.value) },
-                    { name: "선택구간", color: "#2563eb", values: cycleSeries.current.map((p) => p.value) },
-                  ]}
-                />
-              </>
-            )}
+            <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} ({isAllKeywords ? '전체' : `${selectedKeywordIds.size}개`} 키워드 평균)</p>
+            <LineChart
+              labels={Array.from(
+                { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
+                (_, i) => String(GRAPH_WINDOW_START + i)
+              )}
+              series={keywordsSeries}
+            />
+            <div className="chart-legend">
+              {keywordsSeries.map((s) => (
+                <span key={s.name} className="legend-item">
+                  <span className="legend-color" style={{ background: s.color }}></span>
+                  {s.name}
+                </span>
+              ))}
+            </div>
           </div>
         </>
       )}

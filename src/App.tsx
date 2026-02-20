@@ -68,12 +68,11 @@ function App() {
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
   const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, moveKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
-  // UI ?곹깭
+  // UI 상태
   const [tab, setTab] = useState<Tab>("record");
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>(periods[0]?.id ?? "");
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [graphMode, setGraphMode] = useState<GraphMode>("cycle");
-  const [graphKeywordId, setGraphKeywordId] = useState<string>("");
   const [syncPopupOpen, setSyncPopupOpen] = useState(false);
 
   // 怨꾩궛??媛?
@@ -362,9 +361,7 @@ function App() {
             periods={periods}
             selectedPeriodId={activeSelectedPeriodId}
             graphMode={graphMode}
-            graphKeywordId={graphKeywordId}
             onSetGraphMode={setGraphMode}
-            onSetGraphKeywordId={setGraphKeywordId}
             onChangePeriod={onChangePeriod}
           />
         )}
