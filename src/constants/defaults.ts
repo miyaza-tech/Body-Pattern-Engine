@@ -9,20 +9,7 @@ export const STORAGE_KEYS = {
 
 export const CURRENT_YEAR = new Date().getFullYear();
 
-export const DEFAULT_KEYWORDS: KeywordDef[] = [
-  { id: "leg_pain", name: "다리저림", type: "scale" },
-  { id: "headache", name: "두통", type: "scale" },
-  { id: "fatigue", name: "피곤", type: "scale" },
-  { id: "morning_stiff", name: "아침찌뿌둥", type: "scale" },
-  { id: "acne", name: "여드름", type: "scale" },
-  { id: "swelling", name: "붓기", type: "scale" },
-  { id: "diarrhea", name: "설사", type: "check" },
-  { id: "good_bowel", name: "굿똥", type: "check" },
-  { id: "brown_spot", name: "갈색냉", type: "check" },
-  { id: "period_start", name: "생리터짐", type: "event" },
-  { id: "sex", name: "S", type: "check" },
-  { id: "magnesium", name: "마그네슘", type: "tag" },
-];
+export const DEFAULT_KEYWORDS: KeywordDef[] = [];
 
 export const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [];
 

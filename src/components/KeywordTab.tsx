@@ -102,8 +102,18 @@ export function KeywordTab({
         </div>
       </div>
 
+      {Object.values(grouped).every((arr) => arr.length === 0) && (
+        <div className="record-section" style={{ textAlign: "center", padding: "2rem 1rem" }}>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "0.5rem" }}>등록된 키워드가 없습니다.</p>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+            위 입력창에서 <strong>키워드 이름</strong>과 <strong>유형</strong>을 선택한 후<br />
+            <strong>추가</strong> 버튼을 눌러 나만의 키워드를 등록하세요.
+          </p>
+        </div>
+      )}
+
       {(["scale", "check", "event", "tag"] as KeywordType[]).map((type) => (
-        <details key={type} className="record-section collapse" open>
+        <details key={type} className="record-section collapse" open={grouped[type].length > 0}>
           <summary>{TYPE_LABELS[type]}</summary>
           <ul className="keyword-list" role="list">
             {grouped[type].map((keyword) => (

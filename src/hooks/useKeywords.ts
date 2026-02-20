@@ -23,7 +23,7 @@ function safeParseKeywords(raw: string | null): KeywordDef[] {
           ["scale", "check", "event", "tag"].includes(item.type)
       );
 
-    return normalized.length ? normalized : DEFAULT_KEYWORDS;
+    return normalized;
   } catch {
     return DEFAULT_KEYWORDS;
   }
