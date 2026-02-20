@@ -66,7 +66,7 @@ function App() {
   // ?곗씠????
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
-  const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
+  const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, moveKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
   // UI ?곹깭
   const [tab, setTab] = useState<Tab>("record");
@@ -315,6 +315,7 @@ function App() {
             onAddKeyword={addKeyword}
             onUpdateKeyword={updateKeyword}
             onDeleteKeyword={handleDeleteKeyword}
+            onMoveKeyword={moveKeyword}
             onResetDefaults={resetKeywords}
             showToast={success}
           />

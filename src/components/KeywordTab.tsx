@@ -7,6 +7,7 @@ interface KeywordTabProps {
   onAddKeyword: (name: string, type: KeywordType) => boolean;
   onUpdateKeyword: (id: string, name: string, type?: KeywordType) => boolean;
   onDeleteKeyword: (id: string) => void;
+  onMoveKeyword: (id: string, direction: "up" | "down") => void;
   onResetDefaults: () => void;
   showToast: (message: string) => void;
 }
@@ -23,6 +24,7 @@ export function KeywordTab({
   onAddKeyword,
   onUpdateKeyword,
   onDeleteKeyword,
+  onMoveKeyword,
   onResetDefaults,
   showToast,
 }: KeywordTabProps) {
@@ -139,6 +141,22 @@ export function KeywordTab({
                   <>
                     <span className="keyword-name">{keyword.name}</span>
                     <div className="chip-list">
+                      <button
+                        className="chip"
+                        onClick={() => onMoveKeyword(keyword.id, "up")}
+                        aria-label={`${keyword.name} 위로 이동`}
+                        title="위로 이동"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        className="chip"
+                        onClick={() => onMoveKeyword(keyword.id, "down")}
+                        aria-label={`${keyword.name} 아래로 이동`}
+                        title="아래로 이동"
+                      >
+                        ▼
+                      </button>
                       <button
                         className="chip"
                         onClick={() => {

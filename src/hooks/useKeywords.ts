@@ -99,6 +99,23 @@ export function useKeywords() {
     [setKeywords]
   );
 
+  const moveKeyword = useCallback(
+    (id: string, direction: "up" | "down") => {
+      setKeywords((prev) => {
+        const index = prev.findIndex((k) => k.id === id);
+        if (index === -1) return prev;
+
+        const newIndex = direction === "up" ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= prev.length) return prev;
+
+        const newKeywords = [...prev];
+        [newKeywords[index], newKeywords[newIndex]] = [newKeywords[newIndex], newKeywords[index]];
+        return newKeywords;
+      });
+    },
+    [setKeywords]
+  );
+
   const resetToDefaults = useCallback(() => {
     setKeywords(DEFAULT_KEYWORDS);
   }, [setKeywords]);
@@ -110,6 +127,7 @@ export function useKeywords() {
     addKeyword,
     updateKeyword,
     deleteKeyword,
+    moveKeyword,
     resetToDefaults,
     setKeywords,
   };
