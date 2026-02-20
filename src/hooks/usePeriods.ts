@@ -16,6 +16,7 @@ function safeParsePeriods(raw: string | null): PeriodOption[] {
         year: Number(item.year ?? CURRENT_YEAR),
         label: String(item.label ?? "").trim(),
         days: Number(item.days ?? 0),
+        startDayOfWeek: item.startDayOfWeek !== undefined ? Number(item.startDayOfWeek) : undefined,
       }))
       .filter(
         (item) =>
@@ -60,14 +61,14 @@ export function usePeriods() {
   );
 
   const addPeriod = useCallback(
-    (year: number, label: string, days: number) => {
+    (year: number, label: string, days: number, startDayOfWeek?: number) => {
       const trimmedLabel = label.trim();
       if (!trimmedLabel || !Number.isFinite(year) || year < 1900 || !Number.isFinite(days) || days < 1) {
         return false;
       }
 
       const id = generatePeriodId(trimmedLabel);
-      setPeriods((prev) => [...prev, { id, year, label: trimmedLabel, days }]);
+      setPeriods((prev) => [...prev, { id, year, label: trimmedLabel, days, startDayOfWeek }]);
       return true;
     },
     [setPeriods]

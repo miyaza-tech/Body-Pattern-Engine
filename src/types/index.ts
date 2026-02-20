@@ -21,6 +21,7 @@ export interface PeriodOption {
   year: number;
   label: string;
   days: number;
+  startDayOfWeek?: number; // 0=일, 1=월, 2=화, 3=수, 4=목, 5=금, 6=토
 }
 
 // ===== 탭/모드 타입 =====

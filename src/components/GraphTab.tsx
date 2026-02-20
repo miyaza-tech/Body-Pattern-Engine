@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import type { KeywordDef, DayRecordSummary, PeriodOption } from "../types";
 import { CURRENT_YEAR } from "../constants/defaults";
 
+const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
+
 interface GraphTabProps {
   keywords: KeywordDef[];
   periods: PeriodOption[];
@@ -9,12 +11,12 @@ interface GraphTabProps {
   periodRecords: DayRecordSummary[];
   onNavigateToRecord: (day: number) => void;
   onChangePeriod: (periodId: string) => void;
-  selectedPeriod: { year: number; label: string; days: number };
+  selectedPeriod: { year: number; label: string; days: number; startDayOfWeek?: number };
   onDeleteRecord: (day: number) => void;
   onMoveRecord: (fromDay: number, toDay: number) => void;
   onUpdateDays: (newDays: number) => void;
   onDeletePeriod: () => void;
-  onAddPeriod: (year: number, label: string, days: number) => boolean;
+  onAddPeriod: (year: number, label: string, days: number, startDayOfWeek?: number) => boolean;
 }
 
 export function GraphTab({
@@ -43,13 +45,22 @@ export function GraphTab({
   const [newPeriodYear, setNewPeriodYear] = useState<number>(CURRENT_YEAR);
   const [newPeriodLabel, setNewPeriodLabel] = useState("");
   const [newPeriodDays, setNewPeriodDays] = useState("");
+  const [newPeriodStartDay, setNewPeriodStartDay] = useState<number | undefined>(undefined);
+
+  // 날짜에 해당하는 요일 계산
+  const getDayOfWeekName = (day: number): string | null => {
+    if (selectedPeriod.startDayOfWeek === undefined) return null;
+    const dow = (selectedPeriod.startDayOfWeek + day - 1) % 7;
+    return DAY_NAMES[dow];
+  };
 
   const handleAddPeriod = () => {
     const days = Math.floor(Number(newPeriodDays));
-    if (onAddPeriod(newPeriodYear, newPeriodLabel, days)) {
+    if (onAddPeriod(newPeriodYear, newPeriodLabel, days, newPeriodStartDay)) {
       setNewPeriodYear(CURRENT_YEAR);
       setNewPeriodLabel("");
       setNewPeriodDays("");
+      setNewPeriodStartDay(undefined);
       setShowAddPeriod(false);
     }
   };
@@ -211,6 +222,20 @@ export function GraphTab({
               placeholder="일수"
               aria-label="일수"
             />
+            <select
+              value={newPeriodStartDay ?? ""}
+              onChange={(e) => setNewPeriodStartDay(e.target.value ? Number(e.target.value) : undefined)}
+              aria-label="시작 요일"
+            >
+              <option value="">요일 없음</option>
+              <option value="0">일요일</option>
+              <option value="1">월요일</option>
+              <option value="2">화요일</option>
+              <option value="3">수요일</option>
+              <option value="4">목요일</option>
+              <option value="5">금요일</option>
+              <option value="6">토요일</option>
+            </select>
             <button type="submit">추가</button>
           </form>
         </div>
@@ -279,7 +304,9 @@ export function GraphTab({
                   tabIndex={0}
                   onKeyDown={(e) => e.key === "Enter" && handleRowClick(day)}
                 >
-                  <span className="day-num">{day}일</span>
+                  <span className="day-num">
+                    {day}일{getDayOfWeekName(day) && <span className="day-of-week">({getDayOfWeekName(day)})</span>}
+                  </span>
                   <span className="day-text">
                     {activeNames.length > 0 ? activeNames.join(" ") : "-"}
                     {memoText && <span className="memo-inline"> {memoText}</span>}

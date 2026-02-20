@@ -841,8 +841,15 @@ button:disabled {
 
 .month-simple-row .day-num {
   font-weight: 600;
-  min-width: 32px;
+  min-width: 50px;
   color: var(--color-text);
+}
+
+.month-simple-row .day-num .day-of-week {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-left: 2px;
 }
 
 .month-simple-row .day-text {
