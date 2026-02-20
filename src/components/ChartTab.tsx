@@ -22,8 +22,9 @@ interface ChartTabProps {
 }
 
 // 값을 숫자로 변환 (체크형/이벤트/태그는 true=1, false=0)
+// 체크형은 true일 때 3으로 변환 (scale형 최대값과 동일하게 표시)
 function toNumericValue(val: number | boolean | undefined): number {
-  if (typeof val === "boolean") return val ? 1 : 0;
+  if (typeof val === "boolean") return val ? 3 : 0;
   return Number(val ?? 0);
 }
 
