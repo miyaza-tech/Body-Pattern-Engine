@@ -67,7 +67,7 @@ function App() {
   // ?곗씠????
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, setPeriods } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
-  const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, moveKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
+  const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, moveKeyword, setKeywords } = useKeywords();
 
   // UI 상태
   const [tab, setTab] = useState<Tab>("record");
