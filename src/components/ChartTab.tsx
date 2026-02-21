@@ -4,11 +4,18 @@ import { Heatmap } from "./Heatmap";
 import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, PeriodOption, LineSeries } from "../types";
 import { GRAPH_WINDOW_START, GRAPH_WINDOW_END } from "../constants/defaults";
 
-// 키워드별 색상 팔레트
+// 키워드별 색상 팔레트 (선택 구간용 - 진한 색)
 const KEYWORD_COLORS = [
-  "#ef7a7a", "#2563eb", "#10b981", "#f59e0b", "#8b5cf6",
+  "#ef4444", "#2563eb", "#10b981", "#f59e0b", "#8b5cf6",
   "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
   "#14b8a6", "#eab308", "#a855f7", "#22c55e", "#3b82f6",
+];
+
+// 전체 평균용 색상 (연한 색)
+const AVG_COLORS = [
+  "#fca5a5", "#93c5fd", "#6ee7b7", "#fcd34d", "#c4b5fd",
+  "#f9a8d4", "#67e8f9", "#bef264", "#fdba74", "#a5b4fc",
+  "#5eead4", "#fde047", "#d8b4fe", "#86efac", "#93c5fd",
 ];
 
 interface ChartTabProps {
@@ -22,9 +29,8 @@ interface ChartTabProps {
 }
 
 // 값을 숫자로 변환 (체크형/이벤트/태그는 true=1, false=0)
-// 체크형은 true일 때 3으로 변환 (scale형 최대값과 동일하게 표시)
 function toNumericValue(val: number | boolean | undefined): number {
-  if (typeof val === "boolean") return val ? 3 : 0;
+  if (typeof val === "boolean") return val ? 1 : 0;
   return Number(val ?? 0);
 }
 
@@ -49,8 +55,33 @@ export function ChartTab({
     return keywords.filter(k => selectedKeywordIds.has(k.id));
   }, [keywords, selectedKeywordIds, isAllKeywords]);
 
-  // 선택된 키워드들의 평균 시리즈
-  const keywordsSeries: LineSeries[] = useMemo(() => {
+  // 선택된 구간의 기록만 필터링
+  const selectedPeriodRecords = useMemo(() => {
+    return sortedRecords.filter(rec => rec.periodId === selectedPeriodId);
+  }, [sortedRecords, selectedPeriodId]);
+
+  // 선택된 구간의 시리즈 (실선)
+  const selectedSeries: LineSeries[] = useMemo(() => {
+    return displayKeywords.map((keyword, idx) => {
+      const values = Array.from(
+        { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
+        (_, i) => {
+          const day = GRAPH_WINDOW_START + i + 1; // day는 1부터 시작
+          const rec = selectedPeriodRecords.find(r => r.day === day);
+          return rec ? toNumericValue(rec.values[keyword.id]) : 0;
+        }
+      );
+      
+      return {
+        name: keyword.name,
+        color: KEYWORD_COLORS[idx % KEYWORD_COLORS.length],
+        values,
+      };
+    });
+  }, [displayKeywords, selectedPeriodRecords]);
+
+  // 전체 구간 평균 시리즈 (점선으로 표시할 것)
+  const averageSeries: LineSeries[] = useMemo(() => {
     return displayKeywords.map((keyword, idx) => {
       const buckets = new Map<number, number[]>();
       
@@ -74,12 +105,23 @@ export function ChartTab({
       );
       
       return {
-        name: keyword.name,
-        color: KEYWORD_COLORS[idx % KEYWORD_COLORS.length],
+        name: `${keyword.name} (평균)`,
+        color: AVG_COLORS[idx % AVG_COLORS.length],
         values,
+        isDashed: true,
       };
     });
   }, [displayKeywords, sortedRecords]);
+
+  // 합쳐진 시리즈 (선택 구간 + 전체 평균)
+  const combinedSeries = useMemo(() => {
+    const result: LineSeries[] = [];
+    for (let i = 0; i < displayKeywords.length; i++) {
+      if (averageSeries[i]) result.push(averageSeries[i]);
+      if (selectedSeries[i]) result.push(selectedSeries[i]);
+    }
+    return result;
+  }, [displayKeywords, selectedSeries, averageSeries]);
 
   const heatmapData: HeatmapRow[] = useMemo(() => {
     return keywords.map((keyword) => {
@@ -175,19 +217,23 @@ export function ChartTab({
             </div>
           </div>
           <div className="chart-block">
-            <p>D{GRAPH_WINDOW_START} ~ D+{GRAPH_WINDOW_END} ({isAllKeywords ? '전체' : `${selectedKeywordIds.size}개`} 키워드 평균)</p>
+            <p className="chart-info">
+              <span>실선: 선택 구간 ({periods.find(p => p.id === selectedPeriodId)?.label || ''})</span>
+              <span className="chart-info-divider">|</span>
+              <span>점선: 전체 평균</span>
+            </p>
             <LineChart
               labels={Array.from(
                 { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
                 (_, i) => String(GRAPH_WINDOW_START + i)
               )}
-              series={keywordsSeries}
+              series={combinedSeries}
             />
             <div className="chart-legend">
-              {keywordsSeries.map((s) => (
-                <span key={s.name} className="legend-item">
-                  <span className="legend-color" style={{ background: s.color }}></span>
-                  {s.name}
+              {displayKeywords.map((kw, idx) => (
+                <span key={kw.id} className="legend-item">
+                  <span className="legend-color" style={{ background: KEYWORD_COLORS[idx % KEYWORD_COLORS.length] }}></span>
+                  {kw.name}
                 </span>
               ))}
             </div>

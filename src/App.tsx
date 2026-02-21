@@ -4,6 +4,7 @@ import type { Tab, GraphMode, KeywordDef, DayRecord, PeriodOption } from "./type
 import { useKeywords, usePeriods, useRecords, useToast, useTheme, useAuth, useSync } from "./hooks";
 import { KeywordTab, RecordTab, GraphTab, ChartTab, ToastContainer, SyncPanel } from "./components";
 import { exportAllData, importData } from "./utils";
+import { STORAGE_KEYS } from "./constants/defaults";
 
 function App() {
   // ?뚮쭏
@@ -64,7 +65,7 @@ function App() {
     };
   }, [auth.isLoggedIn, runSync, success]);
   // ?곗씠????
-  const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays } = usePeriods();
+  const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, setPeriods } = usePeriods();
   const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
   const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, moveKeyword, resetToDefaults: resetKeywords, setKeywords } = useKeywords();
 
@@ -156,17 +157,33 @@ function App() {
     [setMemo, activeSelectedPeriodId, activeSelectedDay]
   );
 
-  // 濡쒓렇?꾩썐 ?몃뱾??(?숆린???뚮옒洹?珥덇린??
+  // 로그아웃 핸들러 (로컬 데이터 초기화)
   const handleSignOut = useCallback(async () => {
     try {
+      // 세션 스토리지 정리
       sessionStorage.removeItem("bpe_synced_session");
+      
+      // 로컬 스토리지 정리
+      localStorage.removeItem(STORAGE_KEYS.keywords);
+      localStorage.removeItem(STORAGE_KEYS.records);
+      localStorage.removeItem(STORAGE_KEYS.periods);
+      
+      // 상태 초기화
+      setKeywords([]);
+      setRecords({});
+      setPeriods([]);
+      setSelectedPeriodId("");
+      setSelectedDay(1);
+      setTab("record");
+      
+      // 로그아웃
       await auth.signOut();
       setSyncPopupOpen(false);
-      success("로그아웃되었습니다.");
+      success("로그아웃되었습니다. 모든 데이터가 초기화되었습니다.");
     } catch (err) {
       error(err instanceof Error ? err.message : "로그아웃에 실패했습니다.");
     }
-  }, [auth, success, error]);
+  }, [auth, success, error, setKeywords, setRecords, setPeriods]);
 
   // 수동 동기화
   const handleManualSync = useCallback(async () => {
@@ -264,7 +281,7 @@ function App() {
           onClick={() => setTab("graph")}
           aria-selected={tab === "graph"}
         >
-          통계
+          리포트
         </button>
         <button
           className={tab === "chart" ? "active" : ""}
@@ -315,7 +332,6 @@ function App() {
             onUpdateKeyword={updateKeyword}
             onDeleteKeyword={handleDeleteKeyword}
             onMoveKeyword={moveKeyword}
-            onResetDefaults={resetKeywords}
             showToast={success}
           />
         )}
@@ -334,6 +350,7 @@ function App() {
             onSetKeywordValue={handleSetKeywordValue}
             onSetMemo={handleSetMemo}
             selectedPeriod={selectedPeriod}
+            onAddPeriod={addPeriod}
           />
         )}
 
@@ -350,7 +367,6 @@ function App() {
             onMoveRecord={(fromDay, toDay) => moveRecord(activeSelectedPeriodId, fromDay, toDay)}
             onUpdateDays={(newDays) => updatePeriodDays(activeSelectedPeriodId, newDays)}
             onDeletePeriod={() => handleDeletePeriod(activeSelectedPeriodId)}
-            onAddPeriod={addPeriod}
           />
         )}
 

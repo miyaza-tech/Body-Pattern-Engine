@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import type { KeywordDef, DayRecordSummary, PeriodOption } from "../types";
-import { CURRENT_YEAR } from "../constants/defaults";
 
 const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -16,7 +15,6 @@ interface GraphTabProps {
   onMoveRecord: (fromDay: number, toDay: number) => void;
   onUpdateDays: (newDays: number) => void;
   onDeletePeriod: () => void;
-  onAddPeriod: (year: number, label: string, days: number, startDayOfWeek?: number) => boolean;
 }
 
 export function GraphTab({
@@ -31,38 +29,19 @@ export function GraphTab({
   onMoveRecord,
   onUpdateDays,
   onDeletePeriod,
-  onAddPeriod,
 }: GraphTabProps) {
   // 선택된 행 (클릭 시 액션 메뉴 표시)
   const [selectedRowDay, setSelectedRowDay] = useState<number | null>(null);
   const [movingDay, setMovingDay] = useState<number | null>(null);
   const [editingDays, setEditingDays] = useState(false);
   const [tempDays, setTempDays] = useState<string>(String(selectedPeriod.days));
-  const [showAddPeriod, setShowAddPeriod] = useState(false);
   const [showOnlyRecords, setShowOnlyRecords] = useState(false);
-
-  // 월구간 추가 폼 상태
-  const [newPeriodYear, setNewPeriodYear] = useState<number>(CURRENT_YEAR);
-  const [newPeriodLabel, setNewPeriodLabel] = useState("");
-  const [newPeriodDays, setNewPeriodDays] = useState("");
-  const [newPeriodStartDay, setNewPeriodStartDay] = useState<number | undefined>(undefined);
 
   // 날짜에 해당하는 요일 계산
   const getDayOfWeekName = (day: number): string | null => {
     if (selectedPeriod.startDayOfWeek === undefined) return null;
     const dow = (selectedPeriod.startDayOfWeek + day - 1) % 7;
     return DAY_NAMES[dow];
-  };
-
-  const handleAddPeriod = () => {
-    const days = Math.floor(Number(newPeriodDays));
-    if (onAddPeriod(newPeriodYear, newPeriodLabel, days, newPeriodStartDay)) {
-      setNewPeriodYear(CURRENT_YEAR);
-      setNewPeriodLabel("");
-      setNewPeriodDays("");
-      setNewPeriodStartDay(undefined);
-      setShowAddPeriod(false);
-    }
   };
 
   // 키워드 ID -> 이름 맵
@@ -168,12 +147,6 @@ export function GraphTab({
               </option>
             ))}
           </select>
-          <button 
-            className="btn-sm btn-secondary"
-            onClick={() => setShowAddPeriod(!showAddPeriod)}
-          >
-            {showAddPeriod ? "취소" : "+ 추가"}
-          </button>
           {periods.length > 1 && (
             <button 
               className="btn-sm btn-danger"
@@ -186,58 +159,6 @@ export function GraphTab({
               삭제
             </button>
           )}
-        </div>
-      )}
-
-      {/* 월구간 추가 폼 */}
-      {(showAddPeriod || periods.length === 0) && (
-        <div className="period-add-section">
-          <form
-            className="period-add-row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleAddPeriod();
-            }}
-          >
-            <input
-              type="number"
-              min={1900}
-              max={2100}
-              value={newPeriodYear}
-              onChange={(e) => setNewPeriodYear(Number(e.target.value))}
-              placeholder="연도"
-              aria-label="연도"
-            />
-            <input
-              value={newPeriodLabel}
-              onChange={(e) => setNewPeriodLabel(e.target.value)}
-              placeholder="예: 1~2월, 3월"
-              aria-label="월구간 이름"
-            />
-            <input
-              type="number"
-              min={1}
-              value={newPeriodDays}
-              onChange={(e) => setNewPeriodDays(e.target.value)}
-              placeholder="일수"
-              aria-label="일수"
-            />
-            <select
-              value={newPeriodStartDay ?? ""}
-              onChange={(e) => setNewPeriodStartDay(e.target.value ? Number(e.target.value) : undefined)}
-              aria-label="시작 요일"
-            >
-              <option value="">요일 없음</option>
-              <option value="0">일요일</option>
-              <option value="1">월요일</option>
-              <option value="2">화요일</option>
-              <option value="3">수요일</option>
-              <option value="4">목요일</option>
-              <option value="5">금요일</option>
-              <option value="6">토요일</option>
-            </select>
-            <button type="submit">추가</button>
-          </form>
         </div>
       )}
 

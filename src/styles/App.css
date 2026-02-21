@@ -1,55 +1,72 @@
-/* ===== CSS 변수 (라이트 모드) ===== */
+/* ===== CSS 변수 (라이트 모드 - Flat Design 2.0) ===== */
 :root {
   --font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   
   /* 색상 */
-  --color-background: #ffffff;
+  --color-background: #f8f9fa;
+  --color-background-solid: #f8f9fa;
   --color-card: #ffffff;
-  --color-text: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-text-muted: #999999;
-  --color-border: #e5e5e5;
-  --color-border-dotted: #cccccc;
-  --color-primary: #1a1a1a;
+  --color-card-hover: #f1f3f4;
+  --color-text: #202124;
+  --color-text-secondary: #5f6368;
+  --color-text-muted: #9aa0a6;
+  --color-border: #e8eaed;
+  --color-border-dotted: #dadce0;
+  --color-primary: #333333;
+  --color-primary-light: #f5f5f5;
   --color-primary-bg: #f5f5f5;
   --color-primary-text: #ffffff;
-  --color-accent: #1a1a1a;
-  --color-success: #22c55e;
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
+  --color-accent: #ea4335;
+  --color-success: #34a853;
+  --color-error: #ea4335;
+  --color-warning: #fbbc04;
+  
+  /* Flat Design 2.0 그림자 */
+  --shadow-sm: 0 1px 2px rgba(60, 64, 67, 0.1);
+  --shadow-md: 0 2px 6px rgba(60, 64, 67, 0.15);
+  --shadow-lg: 0 4px 12px rgba(60, 64, 67, 0.15);
+  --shadow-hover: 0 4px 8px rgba(60, 64, 67, 0.2);
   
   /* 히트맵 색상 */
   --color-heatmap-0: #ffffff;
-  --color-heatmap-1: #fee2e2;
-  --color-heatmap-2: #fca5a5;
-  --color-heatmap-3: #ef4444;
+  --color-heatmap-1: #fce8e6;
+  --color-heatmap-2: #f6aca2;
+  --color-heatmap-3: #ea4335;
   
   /* 둥글기 */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
   
   color-scheme: light;
 }
 
-/* ===== 다크 모드 ===== */
+/* ===== 다크 모드 (Flat Design 2.0) ===== */
 [data-theme="dark"] {
-  --color-background: #0a0a0a;
-  --color-card: #141414;
-  --color-text: #f5f5f5;
-  --color-text-secondary: #a3a3a3;
-  --color-text-muted: #737373;
-  --color-border: #262626;
-  --color-border-dotted: #404040;
-  --color-primary: #f5f5f5;
-  --color-primary-bg: #262626;
-  --color-primary-text: #0a0a0a;
+  --color-background: #121212;
+  --color-background-solid: #121212;
+  --color-card: #1e1e1e;
+  --color-card-hover: #2d2d2d;
+  --color-text: #e8eaed;
+  --color-text-secondary: #9aa0a6;
+  --color-text-muted: #5f6368;
+  --color-border: #3c4043;
+  --color-border-dotted: #5f6368;
+  --color-primary: #ffffff;
+  --color-primary-light: #2d2d2d;
+  --color-primary-bg: #2d2d2d;
+  --color-primary-text: #121212;
   
-  --color-heatmap-0: #141414;
-  --color-heatmap-1: #3f1f1f;
-  --color-heatmap-2: #7f2f2f;
-  --color-heatmap-3: #ef4444;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.5);
+  
+  --color-heatmap-0: #1e1e1e;
+  --color-heatmap-1: #3c2a29;
+  --color-heatmap-2: #8b4a47;
+  --color-heatmap-3: #f28b82;
   
   color-scheme: dark;
 }
@@ -69,6 +86,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
 button,
@@ -87,16 +105,17 @@ textarea {
   background: var(--color-background);
 }
 
-/* ===== 상단 탭 ===== */
+/* ===== 상단 탭 (Flat Design 2.0) ===== */
 .top-tabs {
   position: sticky;
   top: 0;
   z-index: 20;
   display: flex;
-  gap: 32px;
-  padding: 20px 24px;
-  background: var(--color-background);
-  border-bottom: 1px dotted var(--color-border-dotted);
+  gap: 20px;
+  padding: 12px 16px;
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .top-tabs button {
@@ -130,7 +149,7 @@ textarea {
   background: var(--color-text);
 }
 
-/* 테마 토글 & 설정 버튼 */
+/* 테마 토글 & 설정 버튼 (Flat Design 2.0) */
 .header-actions {
   margin-left: auto;
   display: flex;
@@ -139,35 +158,40 @@ textarea {
 
 .theme-toggle,
 .sync-toggle {
-  background: var(--color-card);
+  background: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   color: var(--color-text-secondary);
 }
 
 .theme-toggle:hover,
 .sync-toggle:hover {
-  border-color: var(--color-text);
-  color: var(--color-text);
-  background: var(--color-background);
+  background: var(--color-card-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 /* ===== 콘텐츠 ===== */
 .content {
-  padding: 24px;
+  padding: 16px;
   padding-bottom: 100px;
 }
 
 .card {
   background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
 }
 
 .card h2 {
@@ -190,11 +214,11 @@ textarea {
   margin-bottom: 12px;
 }
 
-/* ===== 섹션 ===== */
+/* ===== 섹션 (Flat Design 2.0) ===== */
 .record-section {
-  margin-bottom: 32px;
-  padding-bottom: 32px;
-  border-bottom: 1px dotted var(--color-border-dotted);
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .record-section.first {
@@ -236,23 +260,24 @@ textarea {
   content: "−";
 }
 
-/* ===== 입력 필드 ===== */
+/* ===== 입력 필드 (Flat Design 2.0) ===== */
 input,
 select,
 textarea {
   background: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-size: 14px;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--color-text);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
 input::placeholder,
@@ -265,40 +290,46 @@ textarea {
   min-height: 80px;
 }
 
-/* ===== 버튼 ===== */
+/* ===== 버튼 (Flat Design 2.0) ===== */
 button {
-  background: var(--color-background);
+  background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 8px 20px;
-  font-size: 13px;
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 button:hover:not(:disabled) {
-  border-color: var(--color-text);
+  background: var(--color-card-hover);
+  border-color: var(--color-text-secondary);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 button:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .btn-primary {
   background: var(--color-primary);
   color: var(--color-primary-text);
-  border-color: var(--color-primary);
+  border: none;
 }
 
 .btn-primary:hover:not(:disabled) {
-  opacity: 0.85;
+  opacity: 0.9;
+  background: var(--color-primary);
 }
 
 .btn-secondary {
-  background: transparent;
-  border-color: var(--color-border);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   color: var(--color-text);
 }
 
@@ -306,20 +337,58 @@ button:disabled {
 .keyword-add-row,
 .period-add-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 
 .keyword-add-row input,
-.keyword-add-row select {
-  flex: 1;
-  min-width: 120px;
-}
-
-.period-add-row input {
+.keyword-add-row select,
+.period-add-row input,
+.period-add-row select {
   flex: 1;
   min-width: 80px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.keyword-add-row input:focus,
+.keyword-add-row select:focus,
+.period-add-row input:focus,
+.period-add-row select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.keyword-add-row input::placeholder,
+.period-add-row input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.keyword-add-row button,
+.period-add-row button {
+  padding: 12px 20px;
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.keyword-add-row button:hover,
+.period-add-row button:hover {
+  opacity: 0.9;
 }
 
 .period-add-section {
@@ -384,26 +453,27 @@ button:disabled {
   padding: 6px 12px;
 }
 
-/* ===== 칩 ===== */
+/* ===== 칩 (Flat Design 2.0) ===== */
 .chip-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .chip {
-  background: transparent;
+  background: var(--color-background);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .chip:hover {
-  border-color: var(--color-text);
+  background: var(--color-card-hover);
+  border-color: var(--color-text-secondary);
 }
 
 .chip.active {
@@ -465,9 +535,11 @@ button:disabled {
 
 .empty-notice {
   padding: 24px;
-  border: 2px dotted var(--color-border-dotted);
+  background: var(--color-background);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
   text-align: center;
-  margin: 20px 0;
+  margin: 16px 0;
 }
 
 .empty-notice p {
@@ -477,7 +549,7 @@ button:disabled {
 }
 
 .empty-notice strong {
-  color: var(--color-text);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -505,12 +577,20 @@ button:disabled {
 }
 
 .level-buttons button {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   padding: 0;
   font-size: 14px;
   border-radius: var(--radius-sm);
-  font-weight: 500;
+  font-weight: 600;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.level-buttons button:hover:not(.active) {
+  background: var(--color-card-hover);
+  border-color: var(--color-text-secondary);
 }
 
 .level-buttons button.active {
@@ -538,17 +618,24 @@ button:disabled {
   width: 100%;
 }
 
-/* ===== 모드 탭 ===== */
+/* ===== 모드 탭 (Flat Design 2.0) ===== */
 .mode-tabs {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .mode-tabs button {
   flex: 1;
   padding: 12px;
   border-radius: var(--radius-sm);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.mode-tabs button:hover:not(.active) {
+  background: var(--color-card-hover);
 }
 
 .mode-tabs button.active {
@@ -586,6 +673,19 @@ button:disabled {
   font-size: 12px;
   color: var(--color-text-muted);
   margin-bottom: 16px;
+}
+
+.chart-info {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.chart-info-divider {
+  color: var(--color-border);
 }
 
 .chart-empty {
@@ -654,8 +754,9 @@ button:disabled {
 }
 
 .line-chart .axis-text {
-  font-size: 10px;
-  fill: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  fill: var(--color-text-secondary);
 }
 
 /* ===== 히트맵 ===== */
@@ -1294,6 +1395,199 @@ button:disabled {
   border-color: var(--color-primary);
 }
 
+/* ===== 개선된 설정 패널 (Flat Design 2.0) ===== */
+.sync-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.sync-section {
+  padding: 20px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.sync-section-secondary {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+}
+
+.sync-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: var(--color-text);
+}
+
+.sync-help-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.sync-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sync-input {
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.sync-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+
+.sync-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.sync-form-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.btn-sync-main {
+  flex: 1;
+  padding: 14px 20px;
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sync-main:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-sync-main:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-sync-main:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-switch {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  text-decoration: underline;
+  box-shadow: none;
+}
+
+.btn-switch:hover {
+  color: var(--color-primary);
+}
+
+.sync-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.sync-user-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-success);
+  color: white;
+  border-radius: 50%;
+  font-size: 13px;
+}
+
+.sync-user-email {
+  font-size: 14px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.sync-buttons-grid {
+  margin-bottom: 12px;
+}
+
+.sync-buttons-grid .btn-sync-main {
+  width: 100%;
+}
+
+.sync-buttons-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sync-buttons-row:last-child {
+  margin-bottom: 0;
+}
+
+.btn-sync-sub {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sync-sub:hover:not(:disabled) {
+  background: var(--color-card-hover);
+  border-color: var(--color-text-secondary);
+}
+
+.btn-sync-sub:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-logout {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  box-shadow: none;
+}
+
+.btn-logout:hover {
+  color: var(--color-error);
+}
+
 .btn-text {
   background: none;
   border: none;
@@ -1370,7 +1664,7 @@ button:disabled {
   color: var(--color-primary);
 }
 
-/* ===== 토스트 ===== */
+/* ===== 토스트 (Flat Design 2.0) ===== */
 .toast-container {
   position: fixed;
   bottom: 100px;
@@ -1379,21 +1673,21 @@ button:disabled {
   z-index: 100;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   max-width: 90%;
-  width: 380px;
+  width: 360px;
 }
 
 .toast {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px;
+  padding: 14px 16px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  animation: slideUp 0.25s ease;
+  box-shadow: var(--shadow-md);
+  animation: slideUp 0.2s ease;
   cursor: pointer;
 }
 
@@ -1514,14 +1808,14 @@ button:disabled {
 /* ===== Sync 토글 버튼 ===== */
 /* 위의 .header-actions에서 함께 정의됨 */
 
-/* ===== 팝업 오버레이 ===== */
+/* ===== 팝업 오버레이 (Flat Design 2.0) ===== */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1531,6 +1825,7 @@ button:disabled {
 
 .popup-content {
   background: var(--color-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 24px;
   max-width: 400px;
@@ -1538,16 +1833,16 @@ button:disabled {
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
 }
 
 .popup-close {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: transparent;
-  border: none;
-  font-size: 24px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  font-size: 18px;
   cursor: pointer;
   color: var(--color-text-muted);
   width: 32px;
@@ -1556,10 +1851,10 @@ button:disabled {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .popup-close:hover {
-  background: var(--color-border);
+  background: var(--color-card-hover);
   color: var(--color-text);
 }

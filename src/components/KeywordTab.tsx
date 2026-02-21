@@ -8,7 +8,6 @@ interface KeywordTabProps {
   onUpdateKeyword: (id: string, name: string, type?: KeywordType) => boolean;
   onDeleteKeyword: (id: string) => void;
   onMoveKeyword: (id: string, direction: "up" | "down") => void;
-  onResetDefaults: () => void;
   showToast: (message: string) => void;
 }
 
@@ -25,7 +24,6 @@ export function KeywordTab({
   onUpdateKeyword,
   onDeleteKeyword,
   onMoveKeyword,
-  onResetDefaults,
   showToast,
 }: KeywordTabProps) {
   const [newKeywordName, setNewKeywordName] = useState("");
@@ -58,19 +56,19 @@ export function KeywordTab({
     }
   };
 
-  const handleResetDefaults = () => {
-    if (window.confirm("기본 키워드 세트로 복원하시겠습니까? 현재 키워드가 모두 삭제됩니다.")) {
-      onResetDefaults();
-      showToast("기본 키워드로 복원되었습니다.");
-    }
-  };
-
   return (
     <section className="card" aria-labelledby="keyword-tab-title">
       <h2 id="keyword-tab-title">키워드등록</h2>
 
       <div className="record-section">
-        <h3>키워드 추가</h3>
+        {Object.values(grouped).every((arr) => arr.length === 0) && (
+          <div className="empty-notice">
+            <p>등록된 키워드가 없습니다.</p>
+            <p>
+              아래에서 <strong>키워드 이름</strong>과 <strong>유형</strong>을 선택한 후 <strong>추가</strong> 버튼을 눌러주세요.
+            </p>
+          </div>
+        )}
         <form
           className="keyword-add-row"
           onSubmit={(e) => {
@@ -97,20 +95,7 @@ export function KeywordTab({
           </select>
           <button type="submit">추가</button>
         </form>
-        <div className="row-actions">
-          <button onClick={handleResetDefaults}>기본 세트 복원</button>
-        </div>
       </div>
-
-      {Object.values(grouped).every((arr) => arr.length === 0) && (
-        <div className="record-section" style={{ textAlign: "center", padding: "2rem 1rem" }}>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "0.5rem" }}>등록된 키워드가 없습니다.</p>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            위 입력창에서 <strong>키워드 이름</strong>과 <strong>유형</strong>을 선택한 후<br />
-            <strong>추가</strong> 버튼을 눌러 나만의 키워드를 등록하세요.
-          </p>
-        </div>
-      )}
 
       {(["scale", "check", "event", "tag"] as KeywordType[]).map((type) => (
         <details key={type} className="record-section collapse" open={grouped[type].length > 0}>

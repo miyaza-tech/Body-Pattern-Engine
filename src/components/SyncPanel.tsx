@@ -73,7 +73,14 @@ export function SyncPanel({
         : await onSignIn(email, password);
 
       if (error) {
-        showError(error.message);
+        // 에러 메시지 추상화 (상세 정보는 콘솔에만)
+        console.error("Auth error:", error.message);
+        const userMessage = error.message.includes("Invalid login")
+          ? "이메일 또는 비밀번호가 올바르지 않습니다."
+          : error.message.includes("already registered")
+          ? "이미 등록된 이메일입니다."
+          : isSignUp ? "회원가입에 실패했습니다." : "로그인에 실패했습니다.";
+        showError(userMessage);
         return;
       }
 
@@ -81,7 +88,8 @@ export function SyncPanel({
       setEmail("");
       setPassword("");
     } catch (err) {
-      showError(err instanceof Error ? err.message : "인증 실패");
+      console.error("Auth exception:", err);
+      showError(isSignUp ? "회원가입에 실패했습니다." : "로그인에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -100,78 +108,85 @@ export function SyncPanel({
   };
 
   return (
-    <div className="record-section">
-      <h3>클라우드 동기화</h3>
+    <div className="sync-panel">
+      <div className="sync-section">
+        <h3 className="sync-section-title">클라우드 동기화</h3>
 
-      {isLoggedIn ? (
-        <div className="sync-logged-in">
-          <div className="sync-status-row">
-            <span className="sync-status-icon">✓</span>
-            <span className="sync-email">{userEmail}</span>
-          </div>
-          <div className="data-actions">
-            <button type="button" onClick={onSync} className="btn-primary" disabled={syncing}>
-              {syncing ? "..." : "동기화"}
-            </button>
-            <button type="button" onClick={onUpload} className="btn-secondary" disabled={syncing}>
-              ↑ 업로드
-            </button>
-            <button type="button" onClick={onDownload} className="btn-secondary" disabled={syncing}>
-              ↓ 다운로드
-            </button>
-          </div>
-          <div className="data-actions">
-            <button type="button" onClick={onExportData} className="btn-secondary">
-              내보내기
-            </button>
-            <button type="button" onClick={onImportData} className="btn-secondary">
-              가져오기
-            </button>
-            <button type="button" onClick={handleSignOut} className="btn-text" disabled={signOutLoading}>
+        {isLoggedIn ? (
+          <div className="sync-logged-in">
+            <div className="sync-user-badge">
+              <span className="sync-user-icon">✓</span>
+              <span className="sync-user-email">{userEmail}</span>
+            </div>
+            <div className="sync-buttons-grid">
+              <button type="button" onClick={onSync} className="btn-sync-main" disabled={syncing}>
+                {syncing ? "동기화 중..." : "⟳ 동기화"}
+              </button>
+            </div>
+            <div className="sync-buttons-row">
+              <button type="button" onClick={onUpload} className="btn-sync-sub" disabled={syncing}>
+                ↑ 업로드
+              </button>
+              <button type="button" onClick={onDownload} className="btn-sync-sub" disabled={syncing}>
+                ↓ 다운로드
+              </button>
+            </div>
+            <div className="sync-buttons-row">
+              <button type="button" onClick={onExportData} className="btn-sync-sub">
+                내보내기
+              </button>
+              <button type="button" onClick={onImportData} className="btn-sync-sub">
+                가져오기
+              </button>
+            </div>
+            <button type="button" onClick={handleSignOut} className="btn-logout" disabled={signOutLoading}>
               {signOutLoading ? "..." : "로그아웃"}
             </button>
           </div>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="sync-login-form">
-          <input
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="비밀번호 (6자 이상)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            minLength={6}
-            required
-          />
-          <div className="data-actions">
-            <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "..." : isSignUp ? "회원가입" : "로그인"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSignUp((prev) => !prev)}
-              className="btn-text"
-            >
-              {isSignUp ? "로그인으로" : "회원가입으로"}
-            </button>
-          </div>
-        </form>
-      )}
+        ) : (
+          <form onSubmit={handleSubmit} className="sync-form">
+            <input
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="sync-input"
+              required
+            />
+            <input
+              type="password"
+              placeholder="비밀번호 (6자 이상)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="sync-input"
+              minLength={6}
+              required
+            />
+            <div className="sync-form-actions">
+              <button type="submit" disabled={loading} className="btn-sync-main">
+                {loading ? "..." : isSignUp ? "회원가입" : "로그인"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSignUp((prev) => !prev)}
+                className="btn-switch"
+              >
+                {isSignUp ? "로그인으로" : "회원가입으로"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
 
       {!isLoggedIn && (
-        <div className="backup-section">
-          <h4>로컬 백업</h4>
-          <div className="data-actions">
-            <button type="button" onClick={onExportData} className="btn-secondary">
+        <div className="sync-section sync-section-secondary">
+          <h3 className="sync-section-title">로컬 백업</h3>
+          <p className="sync-help-text">로그인 없이 데이터를 파일로 백업하세요.</p>
+          <div className="sync-buttons-row">
+            <button type="button" onClick={onExportData} className="btn-sync-sub">
               내보내기
             </button>
-            <button type="button" onClick={onImportData} className="btn-secondary">
+            <button type="button" onClick={onImportData} className="btn-sync-sub">
               가져오기
             </button>
           </div>

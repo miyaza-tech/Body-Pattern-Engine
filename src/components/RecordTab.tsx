@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { KeywordDef, KeywordType, DayRecord, PeriodOption } from "../types";
+import { CURRENT_YEAR } from "../constants/defaults";
 
 interface RecordTabProps {
   periods: PeriodOption[];
@@ -13,6 +15,7 @@ interface RecordTabProps {
   onSetKeywordValue: (keyword: KeywordDef, value: number | boolean) => void;
   onSetMemo: (memo: string) => void;
   selectedPeriod: PeriodOption;
+  onAddPeriod: (year: number, label: string, days: number, startDayOfWeek?: number) => boolean;
 }
 
 export function RecordTab({
@@ -28,8 +31,25 @@ export function RecordTab({
   onSetKeywordValue,
   onSetMemo,
   selectedPeriod,
+  onAddPeriod,
 }: RecordTabProps) {
   const dayStatus = selectedDay <= 1 ? "D0" : `D+${selectedDay - 1}`;
+
+  // 월구간 추가 폼 상태
+  const [newPeriodYear, setNewPeriodYear] = useState<number>(CURRENT_YEAR);
+  const [newPeriodLabel, setNewPeriodLabel] = useState("");
+  const [newPeriodDays, setNewPeriodDays] = useState("");
+  const [newPeriodStartDay, setNewPeriodStartDay] = useState<number | undefined>(undefined);
+
+  const handleAddPeriod = () => {
+    const days = Math.floor(Number(newPeriodDays));
+    if (onAddPeriod(newPeriodYear, newPeriodLabel, days, newPeriodStartDay)) {
+      setNewPeriodYear(CURRENT_YEAR);
+      setNewPeriodLabel("");
+      setNewPeriodDays("");
+      setNewPeriodStartDay(undefined);
+    }
+  };
 
   return (
     <section className="card" aria-labelledby="record-tab-title">
@@ -37,9 +57,60 @@ export function RecordTab({
 
       {/* 날짜 네비게이션 */}
       {periods.length === 0 ? (
-        <div className="empty-notice">
-          <p>기록을 시작하려면 먼저 <strong>월구간을 추가</strong>하세요.</p>
-          <p>"월별" 탭에서 월구간을 추가할 수 있습니다.</p>
+        <div className="record-section">
+          <div className="empty-notice">
+            <p>기록을 시작하려면 먼저 월구간을 추가하세요.</p>
+            <p>
+              아래에서 <strong>연도</strong>, <strong>월구간 이름</strong>, <strong>일수</strong>를 입력한 후 <strong>추가</strong> 버튼을 눌러주세요.
+            </p>
+          </div>
+          {/* 월구간 추가 폼 */}
+          <form
+            className="period-add-row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddPeriod();
+            }}
+          >
+            <input
+              type="number"
+              min={1900}
+              max={2100}
+              value={newPeriodYear}
+              onChange={(e) => setNewPeriodYear(Number(e.target.value))}
+              placeholder="연도"
+              aria-label="연도"
+            />
+            <input
+              value={newPeriodLabel}
+              onChange={(e) => setNewPeriodLabel(e.target.value)}
+              placeholder="예: 1~2월, 3월"
+              aria-label="월구간 이름"
+            />
+            <input
+              type="number"
+              min={1}
+              value={newPeriodDays}
+              onChange={(e) => setNewPeriodDays(e.target.value)}
+              placeholder="일수"
+              aria-label="일수"
+            />
+            <select
+              value={newPeriodStartDay ?? ""}
+              onChange={(e) => setNewPeriodStartDay(e.target.value ? Number(e.target.value) : undefined)}
+              aria-label="시작 요일"
+            >
+              <option value="">요일 없음</option>
+              <option value="0">일요일</option>
+              <option value="1">월요일</option>
+              <option value="2">화요일</option>
+              <option value="3">수요일</option>
+              <option value="4">목요일</option>
+              <option value="5">금요일</option>
+              <option value="6">토요일</option>
+            </select>
+            <button type="submit">추가</button>
+          </form>
         </div>
       ) : (
         <>

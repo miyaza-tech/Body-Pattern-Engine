@@ -59,7 +59,7 @@ export function StatsTab({
 
   return (
     <section className="card" aria-labelledby="stats-tab-title">
-      <h2 id="stats-tab-title">통계 및 예측</h2>
+      <h2 id="stats-tab-title">리포트</h2>
 
       {/* 주기 예측 */}
       <div className="record-section">

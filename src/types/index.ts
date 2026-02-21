@@ -33,6 +33,7 @@ export interface LineSeries {
   name: string;
   color: string;
   values: number[];
+  isDashed?: boolean;
 }
 
 export interface ChartDataPoint {

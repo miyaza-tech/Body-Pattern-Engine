@@ -11,21 +11,22 @@ export function LineChart({ labels, series, maxY = 3 }: LineChartProps) {
     return <p className="chart-empty">데이터가 아직 없습니다.</p>;
   }
 
-  const padding = 24;
+  const paddingY = 24;
+  const paddingX = 48; // 좌우 패딩 증가
   const chartHeight = 200;
   const stepX = 28;
-  const chartWidth = Math.max(320, labels.length * stepX + padding * 2);
-  const plotHeight = chartHeight - padding * 2;
+  const chartWidth = Math.max(320, labels.length * stepX + paddingX * 2);
+  const plotHeight = chartHeight - paddingY * 2;
   const safeMaxY = maxY <= 0 ? 1 : maxY;
 
   const xFor = (idx: number) => {
     if (labels.length === 1) return chartWidth / 2;
-    return padding + (idx / (labels.length - 1)) * (chartWidth - padding * 2);
+    return paddingX + (idx / (labels.length - 1)) * (chartWidth - paddingX * 2);
   };
 
   const yFor = (value: number) => {
     const v = Math.max(0, Math.min(safeMaxY, value));
-    return padding + ((safeMaxY - v) / safeMaxY) * plotHeight;
+    return paddingY + ((safeMaxY - v) / safeMaxY) * plotHeight;
   };
 
   return (
@@ -50,7 +51,7 @@ export function LineChart({ labels, series, maxY = 3 }: LineChartProps) {
           const y = yFor(v);
           return (
             <g key={v}>
-              <line x1={padding} y1={y} x2={chartWidth - padding} y2={y} className="grid-line" />
+              <line x1={paddingX} y1={y} x2={chartWidth - paddingX} y2={y} className="grid-line" />
               <text x={6} y={y + 4} className="axis-text" aria-hidden="true">
                 {v}
               </text>
@@ -63,8 +64,14 @@ export function LineChart({ labels, series, maxY = 3 }: LineChartProps) {
           const points = s.values.map((value, idx) => `${xFor(idx)},${yFor(value)}`).join(" ");
           return (
             <g key={s.name}>
-              <polyline fill="none" stroke={s.color} strokeWidth={2.5} points={points} />
-              {s.values.map((value, idx) => (
+              <polyline 
+                fill="none" 
+                stroke={s.color} 
+                strokeWidth={s.isDashed ? 1.5 : 2.5} 
+                strokeDasharray={s.isDashed ? "6,4" : "none"}
+                points={points} 
+              />
+              {!s.isDashed && s.values.map((value, idx) => (
                 <circle
                   key={`${s.name}-${idx}`}
                   cx={xFor(idx)}
