@@ -66,13 +66,24 @@ function App() {
   }, [auth.isLoggedIn, runSync, success]);
   // ?곗씠????
   const { periods, getPeriod, addPeriod, deletePeriod, updatePeriodDays, setPeriods } = usePeriods();
-  const { sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
+  const { records, sortedRecords, getRecord, setKeywordValue, setMemo, getRecordsForPeriod, deleteRecordsForPeriod, deleteRecord, moveRecord, setRecords } = useRecords(periods);
   const { keywords, grouped, addKeyword, updateKeyword, deleteKeyword, moveKeyword, setKeywords } = useKeywords();
 
+  // 최근 기간 & 최근 기록일 계산 (초기값용)
+  const latestPeriodId = periods.length ? periods[periods.length - 1].id : "";
+  const latestDay = useMemo(() => {
+    if (!latestPeriodId) return 1;
+    // 해당 기간에서 데이터가 있는 가장 큰 day 찾기
+    const days = Object.values(records)
+      .filter((r) => r.periodId === latestPeriodId)
+      .map((r) => r.day);
+    return days.length ? Math.max(...days) : 1;
+  }, [records, latestPeriodId]);
+
   // UI 상태
-  const [tab, setTab] = useState<Tab>("record");
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string>(periods[0]?.id ?? "");
-  const [selectedDay, setSelectedDay] = useState<number>(1);
+  const [tab, setTab] = useState<Tab>("graph");
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string>(latestPeriodId);
+  const [selectedDay, setSelectedDay] = useState<number>(latestDay);
   const [graphMode, setGraphMode] = useState<GraphMode>("cycle");
   const [syncPopupOpen, setSyncPopupOpen] = useState(false);
 
@@ -174,7 +185,7 @@ function App() {
       setPeriods([]);
       setSelectedPeriodId("");
       setSelectedDay(1);
-      setTab("record");
+      setTab("graph");
       
       // 로그아웃
       await auth.signOut();
@@ -252,7 +263,7 @@ function App() {
     );
   }, [setKeywords, setRecords, error]);
 
-  // 洹몃옒????뿉??湲곕줉?쇰줈 ?대룞
+  // 그래프 등에서 기록으로 이동
   const navigateToRecord = useCallback((day: number) => {
     setTab("record");
     setSelectedDay(day);
