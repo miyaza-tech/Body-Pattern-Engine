@@ -265,6 +265,59 @@ export function RecordTab({
         />
       </div>
       )}
+
+      {/* 월구간 추가 (항상 표시) */}
+      {periods.length > 0 && (
+        <div className="record-section period-add-section">
+          <h3>새 월구간 추가</h3>
+          <form
+            className="period-add-row"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddPeriod();
+            }}
+          >
+            <input
+              type="number"
+              min={1900}
+              max={2100}
+              value={newPeriodYear}
+              onChange={(e) => setNewPeriodYear(Number(e.target.value))}
+              placeholder="연도"
+              aria-label="연도"
+            />
+            <input
+              value={newPeriodLabel}
+              onChange={(e) => setNewPeriodLabel(e.target.value)}
+              placeholder="예: 1~2월, 3월"
+              aria-label="월구간 이름"
+            />
+            <input
+              type="number"
+              min={1}
+              value={newPeriodDays}
+              onChange={(e) => setNewPeriodDays(e.target.value)}
+              placeholder="일수"
+              aria-label="일수"
+            />
+            <select
+              value={newPeriodStartDay ?? ""}
+              onChange={(e) => setNewPeriodStartDay(e.target.value ? Number(e.target.value) : undefined)}
+              aria-label="시작 요일"
+            >
+              <option value="">요일 없음</option>
+              <option value="0">일요일</option>
+              <option value="1">월요일</option>
+              <option value="2">화요일</option>
+              <option value="3">수요일</option>
+              <option value="4">목요일</option>
+              <option value="5">금요일</option>
+              <option value="6">토요일</option>
+            </select>
+            <button type="submit">추가</button>
+          </form>
+        </div>
+      )}
     </section>
   );
 }
