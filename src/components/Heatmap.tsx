@@ -1,4 +1,5 @@
 import type { HeatmapRow } from "../types";
+import { dayToLabel } from "../constants/defaults";
 
 interface HeatmapProps {
   data: HeatmapRow[];
@@ -29,11 +30,14 @@ export function Heatmap({ data, windowStart, windowEnd }: HeatmapProps) {
         <thead>
           <tr>
             <th scope="col">키워드</th>
-            {days.map((day) => (
-              <th key={day} scope="col" aria-label={`D${day >= 0 ? "+" : ""}${day}`}>
-                {day}
-              </th>
-            ))}
+            {days.map((day) => {
+              const label = dayToLabel(day);
+              return (
+                <th key={day} scope="col" aria-label={`D${label}`}>
+                  {label}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>

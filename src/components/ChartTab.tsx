@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { LineChart } from "./LineChart";
 import { Heatmap } from "./Heatmap";
 import type { KeywordDef, GraphMode, DayRecord, HeatmapRow, PeriodOption, LineSeries } from "../types";
-import { GRAPH_WINDOW_START, GRAPH_WINDOW_END } from "../constants/defaults";
+import { GRAPH_WINDOW_START, GRAPH_WINDOW_END, dayToLabel } from "../constants/defaults";
 
 // 키워드별 색상 팔레트 (선택 구간용 - 진한 색)
 const KEYWORD_COLORS = [
@@ -225,7 +225,7 @@ export function ChartTab({
             <LineChart
               labels={Array.from(
                 { length: GRAPH_WINDOW_END - GRAPH_WINDOW_START + 1 },
-                (_, i) => String(GRAPH_WINDOW_START + i)
+                (_, i) => dayToLabel(GRAPH_WINDOW_START + i)
               )}
               series={combinedSeries}
             />

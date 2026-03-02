@@ -13,8 +13,13 @@ export const DEFAULT_KEYWORDS: KeywordDef[] = [];
 
 export const DEFAULT_PERIOD_OPTIONS: PeriodOption[] = [];
 
-export const GRAPH_WINDOW_START = -7;
-export const GRAPH_WINDOW_END = 35;
+export const GRAPH_WINDOW_START = -2;
+export const GRAPH_WINDOW_END = 31;
+
+/** 내부 day 값을 표시용 라벨로 변환 (0 건너뛰기: -2,-1,1,2,...,32) */
+export function dayToLabel(day: number): string {
+  return day < 0 ? String(day) : String(day + 1);
+}
 
 // 차트 색상
 export const CHART_COLORS = {

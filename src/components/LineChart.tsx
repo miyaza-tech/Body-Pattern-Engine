@@ -11,9 +11,9 @@ export function LineChart({ labels, series, maxY = 3 }: LineChartProps) {
     return <p className="chart-empty">데이터가 아직 없습니다.</p>;
   }
 
-  const paddingY = 24;
-  const paddingX = 48; // 좌우 패딩 증가
-  const chartHeight = 200;
+  const paddingY = 28;
+  const paddingX = 52; // 좌우 패딩 증가
+  const chartHeight = 220;
   const stepX = 28;
   const chartWidth = Math.max(320, labels.length * stepX + paddingX * 2);
   const plotHeight = chartHeight - paddingY * 2;
@@ -52,7 +52,7 @@ export function LineChart({ labels, series, maxY = 3 }: LineChartProps) {
           return (
             <g key={v}>
               <line x1={paddingX} y1={y} x2={chartWidth - paddingX} y2={y} className="grid-line" />
-              <text x={6} y={y + 4} className="axis-text" aria-hidden="true">
+              <text x={10} y={y + 5} className="axis-text" aria-hidden="true">
                 {v}
               </text>
             </g>

@@ -754,9 +754,9 @@ button:disabled {
 }
 
 .line-chart .axis-text {
-  font-size: 12px;
-  font-weight: 500;
-  fill: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  fill: var(--color-text);
 }
 
 /* ===== 히트맵 ===== */
